@@ -631,6 +631,13 @@ section { position: relative; }
 }
 .contact h2 a { display: inline-block; transition: color 0.25s ease; }
 .contact h2 a:hover { color: var(--accent); }
+.contact-note {
+  max-width: 48ch;
+  margin-top: 1.75rem;
+  font-size: clamp(1.05rem, 1.6vw, 1.35rem);
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.72);
+}
 .contact-meta {
   display: flex;
   flex-wrap: wrap;
