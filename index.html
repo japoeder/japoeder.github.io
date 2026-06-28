@@ -9,131 +9,114 @@
   <link rel="icon" type="image/x-icon" href="/assets/img/favicon.ico">
   <link rel="canonical" href="https://japoeder.github.io/">
 
-  <!-- Open Graph -->
   <meta property="og:title" content="Jonathan Poeder — AI/ML Architect &amp; Data Scientist">
   <meta property="og:description" content="Building intelligent systems — generative AI, LLM agents, RAG, and end-to-end ML that drive real value.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://japoeder.github.io/">
   <meta property="og:image" content="https://japoeder.github.io/assets/img/headshot.png">
 
-  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=Archivo+Expanded:wght@500;600;700;800;900&family=Inter+Tight:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-
-  <!-- Font Awesome (social icons) -->
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Expanded:wght@600;700;800&family=Hanken+Grotesk:wght@400;500;600;700;800&family=Inter+Tight:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/all.min.css">
-
   <link rel="stylesheet" href="/assets/css/fabric.css">
 </head>
 <body>
 
   <!-- ===================== NAV ===================== -->
-  <nav class="nav on-dark" id="nav">
+  <nav class="nav" id="nav">
     <div class="wrap">
-      <a class="brand" href="/">Jonathan&nbsp;Poeder<span class="dot">.</span></a>
+      <a class="brand" href="/"><span class="mark">JP</span>Jonathan&nbsp;Poeder<span class="dot">.</span></a>
       <button class="nav-toggle" id="navToggle" aria-label="Menu"><span></span><span></span><span></span></button>
       <div class="nav-links" id="navLinks">
         <a href="#about">About</a>
         <a href="#focus">Focus</a>
         <a href="#experience">Experience</a>
         <a href="/projects/">Portfolio</a>
-        <a class="cta" href="#contact">Get in touch</a>
+        <a class="cta" href="#contact"><span class="sq"></span> Get in touch</a>
       </div>
     </div>
   </nav>
 
-  <!-- ===================== HERO ===================== -->
+  <!-- ===================== HERO (quadrant + blob) ===================== -->
   <header class="hero" id="top">
-    <div class="wrap">
-      <div class="mono hero-eyebrow">Data Scientist · AI/ML Architect · Chicago, IL</div>
-      <h1>
-        Building<br>
-        intelligent<br>
-        systems<span class="o">.</span>
-      </h1>
-      <p class="hero-sub">
-        I'm Jonathan Poeder — a certified data scientist with 15+ years turning complex,
-        messy problems into production AI/ML that drives measurable value across finance,
-        retail lending, advertising, and technology.
-      </p>
-      <div class="hero-actions">
-        <a class="btn btn-accent" href="#contact">Get in touch <span class="arr">→</span></a>
-        <a class="btn btn-ghost" href="/projects/">View portfolio <span class="arr">→</span></a>
+    <div class="gridlines"><span></span><span></span><span></span></div>
+
+    <!-- animated wireframe blob -->
+    <div class="blob-wrap">
+      <canvas class="blob-canvas" data-blob data-color="#f37021" data-detail="5"></canvas>
+    </div>
+
+    <!-- node-graph overlay (connectors + cardinal nodes) -->
+    <svg class="connectors" width="100%" height="100%" preserveAspectRatio="none"
+         style="position:absolute;inset:0;z-index:2;pointer-events:none;" aria-hidden="true">
+      <line x1="50%" y1="50%" x2="20%" y2="26%" stroke="rgba(17,19,23,0.10)"/>
+      <line x1="50%" y1="50%" x2="80%" y2="26%" stroke="rgba(17,19,23,0.10)"/>
+      <line x1="50%" y1="50%" x2="20%" y2="74%" stroke="rgba(17,19,23,0.10)"/>
+      <line x1="50%" y1="50%" x2="80%" y2="74%" stroke="rgba(17,19,23,0.10)"/>
+    </svg>
+    <span class="node" style="left:50%;top:26%;transform:translate(-50%,-50%)"></span>
+    <span class="node" style="left:50%;top:74%;transform:translate(-50%,-50%)"></span>
+    <span class="node" style="left:32%;top:50%;transform:translate(-50%,-50%)"></span>
+    <span class="node" style="left:68%;top:50%;transform:translate(-50%,-50%)"></span>
+
+    <div class="hero-inner">
+      <!-- desktop corner cards -->
+      <div class="quad tl desk">
+        <a class="card-label" href="#about"><span class="ic"><i class="fas fa-user"></i></span> About Me</a>
+        <p class="card-desc">Certified data scientist with 15+ years turning complex problems into production AI/ML.</p>
       </div>
-      <div class="scroll-cue mono"><span class="line"></span> Scroll</div>
+      <div class="quad tr desk">
+        <a class="card-label" href="/projects/"><span class="ic"><i class="fas fa-folder-open"></i></span> Portfolio</a>
+        <p class="card-desc">Projects, achievements, and certificates across finance, retail, and technology.</p>
+      </div>
+      <div class="quad bl desk">
+        <a class="card-label" href="#experience"><span class="ic"><i class="fas fa-stream"></i></span> Experience</a>
+        <p class="card-desc">From forecasting research at Nielsen to AI architecture at Protiviti — a 15-year arc.</p>
+      </div>
+      <div class="quad br desk">
+        <a class="card-label" href="#contact"><span class="sq">R</span> Build with me</a>
+        <p class="card-desc">Open to consulting engagements. Now is a great time to build with AI.</p>
+      </div>
+
+      <!-- big title -->
+      <h1 class="hero-title">Data science for the <span class="accent">AI&nbsp;economy.</span></h1>
+
+      <!-- mobile stacked cards -->
+      <div class="quads-mobile" style="display:none">
+        <div class="quad"><a class="card-label" href="#about"><span class="ic"><i class="fas fa-user"></i></span> About Me</a><p class="card-desc">Certified data scientist with 15+ years turning complex problems into production AI/ML.</p></div>
+        <div class="quad"><a class="card-label" href="/projects/"><span class="ic"><i class="fas fa-folder-open"></i></span> Portfolio</a><p class="card-desc">Projects, achievements, and certificates across finance, retail, and technology.</p></div>
+        <div class="quad"><a class="card-label" href="#experience"><span class="ic"><i class="fas fa-stream"></i></span> Experience</a><p class="card-desc">From forecasting research at Nielsen to AI architecture at Protiviti.</p></div>
+        <div class="quad"><a class="card-label" href="#contact"><span class="sq">R</span> Build with me</a><p class="card-desc">Open to consulting engagements. Now is a great time to build with AI.</p></div>
+      </div>
     </div>
   </header>
 
-  <!-- ===================== MARQUEE ===================== -->
-  <div class="marquee" aria-hidden="true">
-    <div class="marquee-track">
-      <span>Generative AI</span><span>LLM Agents</span><span>RAG Systems</span><span>Time-Series Forecasting</span><span>Credit Risk</span><span>MLOps</span><span>Deep Learning</span>
-      <span>Generative AI</span><span>LLM Agents</span><span>RAG Systems</span><span>Time-Series Forecasting</span><span>Credit Risk</span><span>MLOps</span><span>Deep Learning</span>
-    </div>
-  </div>
-
   <!-- ===================== STATS ===================== -->
-  <section class="section-pad" id="impact">
+  <section class="sec section-pad" id="impact">
     <div class="wrap">
       <div class="eyebrow mono reveal">By the numbers</div>
       <div class="stats reveal">
-        <div class="stat">
-          <div class="num">15<span class="accent">+</span></div>
-          <div class="label">Years across advanced analytics &amp; AI/ML</div>
-        </div>
-        <div class="stat">
-          <div class="num">$14<span class="accent">B</span></div>
-          <div class="label">Mortgage portfolio stress-tested for the Federal Reserve</div>
-        </div>
-        <div class="stat">
-          <div class="num">$1<span class="accent">B+</span></div>
-          <div class="label">In consumer loans underwritten by my origination &amp; fraud models</div>
-        </div>
-        <div class="stat">
-          <div class="num">4</div>
-          <div class="label">U.S. patent applications on an automated alerting platform</div>
-        </div>
+        <div class="stat"><div class="num">15<span class="accent">+</span></div><div class="label">Years across advanced analytics &amp; AI/ML</div></div>
+        <div class="stat"><div class="num">$14<span class="accent">B</span></div><div class="label">Mortgage portfolio stress-tested for the Federal Reserve</div></div>
+        <div class="stat"><div class="num">$1<span class="accent">B+</span></div><div class="label">In consumer loans underwritten by my origination &amp; fraud models</div></div>
+        <div class="stat"><div class="num">4</div><div class="label">U.S. patent applications on an automated alerting platform</div></div>
       </div>
     </div>
   </section>
 
   <!-- ===================== ABOUT ===================== -->
-  <section class="section-pad" id="about" style="border-top:1px solid var(--line);">
+  <section class="sec section-pad" id="about">
     <div class="wrap">
       <div class="about-grid">
         <div>
           <div class="eyebrow mono reveal">01 — About</div>
-          <p class="lede reveal">
-            I build end-to-end machine learning — from <span class="accent">ETL and feature
-            engineering</span> to models, agents, and the platforms that serve them.
-          </p>
+          <p class="lede reveal">I build end-to-end machine learning — from <span class="accent">ETL and feature engineering</span> to models, agents, and the platforms that serve them.</p>
           <div class="about-body reveal" style="margin-top:2rem;">
-            <p>
-              I started my career at <strong>Nielsen</strong> on a global R&amp;D team specializing in
-              forecasting. My most notable work there was a modeling platform that automated the
-              Box-Jenkins (ARIMA) methodology — it won P&amp;G's global forecasting business and led
-              to four patent applications. That project sparked a deep interest in predictive modeling
-              and applying it where it creates real value.
-            </p>
-            <p>
-              Since then I've worked across <strong>credit risk, banking, advertising technology, and
-              consulting</strong> — building origination and fraud scorecards, CCAR/DFAST stress-testing
-              models, auto-ML forecasting engines, and most recently <strong>generative-AI accelerators</strong>:
-              multi-tenant Azure platforms, LLM tool-calling agents, multimodal RAG, and MCP servers.
-              Today I'm an <strong>AI/ML Architect at Protiviti</strong> in Chicago.
-            </p>
-            <p>
-              I hold a BS and MS in Economics from UNC Charlotte, a post-graduate program in AI/ML from
-              UT Austin, and I'm pursuing a second MS in Artificial Intelligence at
-              <a href="https://ep.jhu.edu/programs/artificial-intelligence/" target="_blank" rel="noopener noreferrer">Johns Hopkins University</a>.
-              Explore my <a href="/projects/">portfolio</a> for projects, skills, and certificates.
-            </p>
-            <p>
-              Outside of work I read, tinker with my rackmount homelab, kayak when the weather allows,
-              and play volleyball when I can get on a team. I've also delivered a number of independent
-              consulting engagements — reach out if your organization needs data-science firepower.
-            </p>
+            <p>I started my career at <strong>Nielsen</strong> on a global R&amp;D team specializing in forecasting. My most notable work there was a modeling platform that automated the Box-Jenkins (ARIMA) methodology — it won P&amp;G's global forecasting business and led to four patent applications. That project sparked a deep interest in predictive modeling and applying it where it creates real value.</p>
+            <p>Since then I've worked across <strong>credit risk, banking, advertising technology, and consulting</strong> — building origination and fraud scorecards, CCAR/DFAST stress-testing models, auto-ML forecasting engines, and most recently <strong>generative-AI accelerators</strong>: multi-tenant Azure platforms, LLM tool-calling agents, multimodal RAG, and MCP servers. Today I'm an <strong>AI/ML Architect at Protiviti</strong> in Chicago.</p>
+            <p>I hold a BS and MS in Economics from UNC Charlotte, a post-graduate program in AI/ML from UT Austin, and I'm pursuing a second MS in Artificial Intelligence at <a href="https://ep.jhu.edu/programs/artificial-intelligence/" target="_blank" rel="noopener noreferrer">Johns Hopkins University</a>. Explore my <a href="/projects/">portfolio</a> for projects, skills, and certificates.</p>
+            <p>Outside of work I read, tinker with my rackmount homelab, kayak when the weather allows, and play volleyball when I can get on a team. I've also delivered a number of independent consulting engagements — reach out if your organization needs data-science firepower.</p>
           </div>
         </div>
         <div class="portrait reveal">
@@ -145,271 +128,87 @@
   </section>
 
   <!-- ===================== FOCUS ===================== -->
-  <section class="section-pad" id="focus" style="border-top:1px solid var(--line);">
+  <section class="sec section-pad" id="focus">
     <div class="wrap">
       <div class="sec-head reveal">
-        <h2><span class="idx">02</span> &nbsp;What I do</h2>
+        <div class="l"><span class="idx">02</span><h2>What I do</h2></div>
         <p>Where strategy, statistics, and engineering meet — the work I do best.</p>
       </div>
       <div class="focus-grid reveal">
-        <div class="focus-card">
-          <span class="fnum">01</span>
-          <h3>Generative AI &amp; LLM Agents</h3>
-          <p>Tool-calling agents, multimodal RAG, MCP servers, and natural-language-to-SQL layers built on Azure OpenAI, Claude, and modern orchestration.</p>
-        </div>
-        <div class="focus-card">
-          <span class="fnum">02</span>
-          <h3>Time-Series Forecasting</h3>
-          <p>SARIMAX, Holt-Winters, ARIMA, and auto-ML model banks with macroeconomic overlays, diagnostics, and dynamic model selection at scale.</p>
-        </div>
-        <div class="focus-card">
-          <span class="fnum">03</span>
-          <h3>Credit Risk &amp; Modeling</h3>
-          <p>PD/LGD stress-testing (CCAR/DFAST), origination and fraud scorecards, and regulator-grade model validation under SR 11-7 / OCC 2011-12.</p>
-        </div>
-        <div class="focus-card">
-          <span class="fnum">04</span>
-          <h3>Deep Learning &amp; CV/NLP</h3>
-          <p>CNN classifiers, neural nets from scratch, sentiment and NLP pipelines, GADF feature extraction — PyTorch, TensorFlow, Keras.</p>
-        </div>
-        <div class="focus-card">
-          <span class="fnum">05</span>
-          <h3>Data &amp; ML Engineering</h3>
-          <p>dbt pipelines, FastAPI / React full-stack apps, Docker, AWS &amp; Azure Container Apps, Snowflake, DuckDB, and CI-ready deployment.</p>
-        </div>
-        <div class="focus-card">
-          <span class="fnum">06</span>
-          <h3>Leadership &amp; Delivery</h3>
-          <p>Technical lead across AI Studio engagements, building and mentoring data-science teams, and scoping accelerators for internal and external buyers.</p>
-        </div>
+        <div class="focus-card"><span class="fnum">01</span><h3>Generative AI &amp; LLM Agents</h3><p>Tool-calling agents, multimodal RAG, MCP servers, and natural-language-to-SQL layers on Azure OpenAI &amp; Claude.</p></div>
+        <div class="focus-card"><span class="fnum">02</span><h3>Time-Series Forecasting</h3><p>SARIMAX, Holt-Winters, ARIMA, and auto-ML model banks with macro overlays and dynamic model selection.</p></div>
+        <div class="focus-card"><span class="fnum">03</span><h3>Credit Risk &amp; Modeling</h3><p>PD/LGD stress-testing (CCAR/DFAST), origination and fraud scorecards, regulator-grade model validation.</p></div>
+        <div class="focus-card"><span class="fnum">04</span><h3>Deep Learning &amp; CV/NLP</h3><p>CNN classifiers, neural nets from scratch, sentiment &amp; NLP pipelines — PyTorch, TensorFlow, Keras.</p></div>
+        <div class="focus-card"><span class="fnum">05</span><h3>Data &amp; ML Engineering</h3><p>dbt pipelines, FastAPI / React full-stack apps, Docker, AWS &amp; Azure Container Apps, Snowflake, DuckDB.</p></div>
+        <div class="focus-card"><span class="fnum">06</span><h3>Leadership &amp; Delivery</h3><p>Technical lead across AI Studio engagements, building and mentoring data-science teams.</p></div>
       </div>
     </div>
   </section>
 
-  <!-- ===================== EXPERIENCE / TIMELINE ===================== -->
-  <section class="section-pad" id="experience" style="border-top:1px solid var(--line);">
+  <!-- ===================== EXPERIENCE ===================== -->
+  <section class="sec section-pad" id="experience">
     <div class="wrap">
       <div class="sec-head reveal">
-        <h2><span class="idx">03</span> &nbsp;Career timeline</h2>
+        <div class="l"><span class="idx">03</span><h2>Career timeline</h2></div>
         <p>A path from forecasting research to enterprise AI architecture.</p>
       </div>
       <div class="timeline">
-
-        <div class="tl-row reveal">
-          <div class="tl-when">Jan 2026 — Present</div>
-          <div class="tl-what">
-            <span class="role"><a href="https://www.protiviti.com" target="_blank" rel="noopener noreferrer">Protiviti</a></span>
-            <span class="detail">AI/ML Architect — multi-tenant Azure GenAI platforms, LLM tool-calling agents, multimodal RAG, and MCP servers.</span>
-          </div>
-          <div class="tl-where">Chicago, IL</div>
-        </div>
-
-        <div class="tl-row reveal">
-          <div class="tl-when">May 2024 — Jan 2026</div>
-          <div class="tl-what">
-            <span class="role"><a href="https://www.pwc.com" target="_blank" rel="noopener noreferrer">PricewaterhouseCoopers</a></span>
-            <span class="detail">AI/ML Architect — auto-ML forecasting, CNN classifiers, GADF feature extraction, and dbt pipelines for Fortune 100 clients.</span>
-          </div>
-          <div class="tl-where">Chicago, IL</div>
-        </div>
-
-        <div class="tl-row reveal">
-          <div class="tl-when">Nov 2023 — May 2024</div>
-          <div class="tl-what">
-            <span class="role">Innov8iveLabs</span>
-            <span class="detail">Data Science Consultant &amp; Owner — collectability and friendly-fraud scoring, WSGI APIs, and AWS SageMaker deployment.</span>
-          </div>
-          <div class="tl-where">Chicago, IL</div>
-        </div>
-
-        <div class="tl-row reveal">
-          <div class="tl-when">Jul 2021 — Jan 2024</div>
-          <div class="tl-what">
-            <span class="role"><a href="https://crossscreen.media" target="_blank" rel="noopener noreferrer">Cross Screen Media</a></span>
-            <span class="detail">Data Scientist Lead — audience classification, Slack cost-alerting, and Snowflake migration in adtech measurement.</span>
-          </div>
-          <div class="tl-where">Alexandria, VA</div>
-        </div>
-
-        <div class="tl-row reveal">
-          <div class="tl-when">Mar 2019 — Jun 2021</div>
-          <div class="tl-what">
-            <span class="role"><a href="https://www.cshco.com" target="_blank" rel="noopener noreferrer">Clark Schaefer Hackett</a></span>
-            <span class="detail">Data Analytics Lead — built and led the firm's data-analytics service line across $1.25M+ in engagements.</span>
-          </div>
-          <div class="tl-where">Cincinnati, OH</div>
-        </div>
-
-        <div class="tl-row reveal">
-          <div class="tl-when">Oct 2015 — Mar 2019</div>
-          <div class="tl-what">
-            <span class="role"><a href="https://www.53.com" target="_blank" rel="noopener noreferrer">Fifth Third Bank</a></span>
-            <span class="detail">Principal Data Scientist — PD &amp; LGD models for a $14B mortgage portfolio, delivered to the Federal Reserve (CCAR).</span>
-          </div>
-          <div class="tl-where">Cincinnati, OH</div>
-        </div>
-
-        <div class="tl-row reveal">
-          <div class="tl-when">Apr 2013 — Oct 2015</div>
-          <div class="tl-what">
-            <span class="role">Axcess Financial</span>
-            <span class="detail">Data Science Manager — ML credit-scoring and fraud models underwriting the firm's largest US retail portfolio.</span>
-          </div>
-          <div class="tl-where">Cincinnati, OH</div>
-        </div>
-
-        <div class="tl-row reveal">
-          <div class="tl-when">Jul 2012 — Feb 2013</div>
-          <div class="tl-what">
-            <span class="role">In4mation Insights</span>
-            <span class="detail">Director, Marketing Science — Bayesian brand-switching and price-optimization modeling.</span>
-          </div>
-          <div class="tl-where">Needham, MA</div>
-        </div>
-
-        <div class="tl-row reveal">
-          <div class="tl-when">Apr 2008 — Jul 2012</div>
-          <div class="tl-what">
-            <span class="role"><a href="https://www.nielsen.com" target="_blank" rel="noopener noreferrer">The Nielsen Company</a></span>
-            <span class="detail">Data Scientist → Senior — auto-ML ARIMA forecasting that won P&amp;G and Walmart; 4 patent applications.</span>
-          </div>
-          <div class="tl-where">Stamford, CT</div>
-        </div>
-
-        <div class="tl-row reveal">
-          <div class="tl-when">2028 (expected)</div>
-          <div class="tl-what">
-            <span class="role"><a href="https://ep.jhu.edu/programs/artificial-intelligence/" target="_blank" rel="noopener noreferrer">Johns Hopkins University</a></span>
-            <span class="detail">MS, Artificial Intelligence — Whiting School of Engineering (in progress).</span>
-          </div>
-          <div class="tl-where">Baltimore, MD</div>
-        </div>
-
-        <div class="tl-row reveal">
-          <div class="tl-when">2004 &amp; 2007</div>
-          <div class="tl-what">
-            <span class="role"><a href="https://belkcollege.charlotte.edu" target="_blank" rel="noopener noreferrer">UNC Charlotte</a></span>
-            <span class="detail">BS Economics (2004) &amp; MS Economics (2007), Belk College of Business.</span>
-          </div>
-          <div class="tl-where">Charlotte, NC</div>
-        </div>
-
+        <div class="tl-row reveal"><div class="tl-when">Jan 2026 — Present</div><div class="tl-what"><span class="role"><a href="https://www.protiviti.com" target="_blank" rel="noopener noreferrer">Protiviti</a></span><span class="detail">AI/ML Architect — multi-tenant Azure GenAI platforms, LLM tool-calling agents, multimodal RAG, MCP servers.</span></div><div class="tl-where">Chicago, IL</div></div>
+        <div class="tl-row reveal"><div class="tl-when">May 2024 — Jan 2026</div><div class="tl-what"><span class="role"><a href="https://www.pwc.com" target="_blank" rel="noopener noreferrer">PricewaterhouseCoopers</a></span><span class="detail">AI/ML Architect — auto-ML forecasting, CNN classifiers, GADF feature extraction, dbt pipelines for Fortune 100 clients.</span></div><div class="tl-where">Chicago, IL</div></div>
+        <div class="tl-row reveal"><div class="tl-when">Nov 2023 — May 2024</div><div class="tl-what"><span class="role">Innov8iveLabs</span><span class="detail">Data Science Consultant &amp; Owner — collectability and friendly-fraud scoring, WSGI APIs, AWS SageMaker deployment.</span></div><div class="tl-where">Chicago, IL</div></div>
+        <div class="tl-row reveal"><div class="tl-when">Jul 2021 — Jan 2024</div><div class="tl-what"><span class="role"><a href="https://crossscreen.media" target="_blank" rel="noopener noreferrer">Cross Screen Media</a></span><span class="detail">Data Scientist Lead — audience classification, Slack cost-alerting, Snowflake migration in adtech measurement.</span></div><div class="tl-where">Alexandria, VA</div></div>
+        <div class="tl-row reveal"><div class="tl-when">Mar 2019 — Jun 2021</div><div class="tl-what"><span class="role"><a href="https://www.cshco.com" target="_blank" rel="noopener noreferrer">Clark Schaefer Hackett</a></span><span class="detail">Data Analytics Lead — built and led the firm's data-analytics service line across $1.25M+ in engagements.</span></div><div class="tl-where">Cincinnati, OH</div></div>
+        <div class="tl-row reveal"><div class="tl-when">Oct 2015 — Mar 2019</div><div class="tl-what"><span class="role"><a href="https://www.53.com" target="_blank" rel="noopener noreferrer">Fifth Third Bank</a></span><span class="detail">Principal Data Scientist — PD &amp; LGD models for a $14B mortgage portfolio, delivered to the Federal Reserve (CCAR).</span></div><div class="tl-where">Cincinnati, OH</div></div>
+        <div class="tl-row reveal"><div class="tl-when">Apr 2013 — Oct 2015</div><div class="tl-what"><span class="role">Axcess Financial</span><span class="detail">Data Science Manager — ML credit-scoring and fraud models underwriting the firm's largest US retail portfolio.</span></div><div class="tl-where">Cincinnati, OH</div></div>
+        <div class="tl-row reveal"><div class="tl-when">Jul 2012 — Feb 2013</div><div class="tl-what"><span class="role">In4mation Insights</span><span class="detail">Director, Marketing Science — Bayesian brand-switching and price-optimization modeling.</span></div><div class="tl-where">Needham, MA</div></div>
+        <div class="tl-row reveal"><div class="tl-when">Apr 2008 — Jul 2012</div><div class="tl-what"><span class="role"><a href="https://www.nielsen.com" target="_blank" rel="noopener noreferrer">The Nielsen Company</a></span><span class="detail">Data Scientist → Senior — auto-ML ARIMA forecasting that won P&amp;G and Walmart; 4 patent applications.</span></div><div class="tl-where">Stamford, CT</div></div>
+        <div class="tl-row reveal"><div class="tl-when">2028 (expected)</div><div class="tl-what"><span class="role"><a href="https://ep.jhu.edu/programs/artificial-intelligence/" target="_blank" rel="noopener noreferrer">Johns Hopkins University</a></span><span class="detail">MS, Artificial Intelligence — Whiting School of Engineering (in progress).</span></div><div class="tl-where">Baltimore, MD</div></div>
+        <div class="tl-row reveal"><div class="tl-when">2004 &amp; 2007</div><div class="tl-what"><span class="role"><a href="https://belkcollege.charlotte.edu" target="_blank" rel="noopener noreferrer">UNC Charlotte</a></span><span class="detail">BS Economics (2004) &amp; MS Economics (2007), Belk College of Business.</span></div><div class="tl-where">Charlotte, NC</div></div>
       </div>
     </div>
   </section>
 
   <!-- ===================== SELECTED WORK ===================== -->
-  <section class="section-pad" id="work" style="border-top:1px solid var(--line);">
+  <section class="sec section-pad" id="work">
     <div class="wrap">
       <div class="sec-head reveal">
-        <h2><span class="idx">04</span> &nbsp;Selected work</h2>
+        <div class="l"><span class="idx">04</span><h2>Selected work</h2></div>
         <p>A few representative projects. The full set lives in the portfolio.</p>
       </div>
       <div class="work-grid">
-
-        <a class="work-card reveal" href="https://github.com/japoeder/Origination-Model-Project" target="_blank" rel="noopener noreferrer">
-          <div class="work-thumb"><img src="/projects/Images/loanapp.jpg" alt="Origination model"></div>
-          <div class="work-body">
-            <div class="tags"><span>Credit Risk</span><span>XGBoost</span><span>PyTorch</span></div>
-            <h3>Origination Model</h3>
-            <p>Logistic regression, random forest, and XGBoost classifiers solving a consumer-lending origination problem in the credit-risk space.</p>
-            <span class="go">View on GitHub <span class="arr">→</span></span>
-          </div>
-        </a>
-
-        <a class="work-card reveal" href="https://github.com/japoeder/Basket-Analysis" target="_blank" rel="noopener noreferrer">
-          <div class="work-thumb"><img src="/projects/Images/groceries.jpeg" alt="Basket analysis"></div>
-          <div class="work-body">
-            <div class="tags"><span>Retail Analytics</span><span>PCA</span><span>K-Means</span></div>
-            <h3>Instacart Basket Analysis</h3>
-            <p>Segmentation and market-basket analysis over 3M grocery orders from 200K+ users — PCA, clustering, and association lift.</p>
-            <span class="go">View on GitHub <span class="arr">→</span></span>
-          </div>
-        </a>
-
-        <a class="work-card reveal" href="https://github.com/japoeder/aws_cost_tracking" target="_blank" rel="noopener noreferrer">
-          <div class="work-thumb"><img src="/projects/Images/slack_plus_aws.png" alt="Slack AWS cost alerting"></div>
-          <div class="work-body">
-            <div class="tags"><span>Cloud Ops</span><span>AWS</span><span>Slack API</span></div>
-            <h3>Slack Cost Alerting for AWS</h3>
-            <p>A Slack-integrated anomaly alerting system for AWS and Snowflake spend that flagged a spike preventing $30K+ in monthly compute cost.</p>
-            <span class="go">View on GitHub <span class="arr">→</span></span>
-          </div>
-        </a>
-
-        <a class="work-card reveal" href="/projects/">
-          <div class="work-thumb"><img src="/projects/Images/economy.jpeg" alt="More projects"></div>
-          <div class="work-body">
-            <div class="tags"><span>NLP</span><span>Computer Vision</span><span>Forecasting</span></div>
-            <h3>Explore the full portfolio</h3>
-            <p>Micro-projects, certificates, core competencies, and career achievements across banking, retail, and technology.</p>
-            <span class="go">Open portfolio <span class="arr">→</span></span>
-          </div>
-        </a>
-
+        <a class="work-card reveal" href="https://github.com/japoeder/Origination-Model-Project" target="_blank" rel="noopener noreferrer"><div class="work-thumb"><img src="/projects/Images/loanapp.jpg" alt="Origination model"></div><div class="work-body"><div class="tags"><span>Credit Risk</span><span>XGBoost</span><span>PyTorch</span></div><h3>Origination Model</h3><p>Logistic regression, random forest, and XGBoost classifiers solving a consumer-lending origination problem.</p><span class="go">View on GitHub <span class="arr">→</span></span></div></a>
+        <a class="work-card reveal" href="https://github.com/japoeder/Basket-Analysis" target="_blank" rel="noopener noreferrer"><div class="work-thumb"><img src="/projects/Images/groceries.jpeg" alt="Basket analysis"></div><div class="work-body"><div class="tags"><span>Retail Analytics</span><span>PCA</span><span>K-Means</span></div><h3>Instacart Basket Analysis</h3><p>Segmentation and market-basket analysis over 3M grocery orders from 200K+ users.</p><span class="go">View on GitHub <span class="arr">→</span></span></div></a>
+        <a class="work-card reveal" href="https://github.com/japoeder/aws_cost_tracking" target="_blank" rel="noopener noreferrer"><div class="work-thumb"><img src="/projects/Images/slack_plus_aws.png" alt="Slack AWS cost alerting"></div><div class="work-body"><div class="tags"><span>Cloud Ops</span><span>AWS</span><span>Slack API</span></div><h3>Slack Cost Alerting for AWS</h3><p>A Slack-integrated anomaly alerting system for AWS &amp; Snowflake spend that flagged a $30K+ spike.</p><span class="go">View on GitHub <span class="arr">→</span></span></div></a>
+        <a class="work-card reveal" href="/projects/"><div class="work-thumb"><img src="/projects/Images/economy.jpeg" alt="More projects"></div><div class="work-body"><div class="tags"><span>NLP</span><span>Computer Vision</span><span>Forecasting</span></div><h3>Explore the full portfolio</h3><p>Micro-projects, certificates, core competencies, and career achievements.</p><span class="go">Open portfolio <span class="arr">→</span></span></div></a>
       </div>
     </div>
   </section>
 
-  <!-- ===================== CONTACT ===================== -->
-  <section class="contact" id="contact">
-    <div class="wrap">
+  <!-- ===================== FOOTER / CONTACT ===================== -->
+  <footer class="footer" id="contact">
+    <canvas class="footer-blob" data-blob data-color="#f37021" data-detail="4"></canvas>
+    <div class="wrap footer-cta">
       <div class="eyebrow mono reveal">05 — Let's talk</div>
       <h2 class="reveal">Let's build something<span class="accent">.</span></h2>
       <p class="contact-note reveal">The best way to contact me is through email. I'm also open to consulting engagements — reach out anytime.</p>
       <div class="contact-meta reveal">
-        <div class="col">
-          <div class="k">Email</div>
-          <div class="v"><a href="mailto:japoeder@gmail.com">japoeder@gmail.com</a></div>
-        </div>
-        <div class="col">
-          <div class="k">Based in</div>
-          <div class="v">Chicago, Illinois</div>
-        </div>
-        <div class="col">
-          <div class="k">Elsewhere</div>
-          <div class="socials">
-            <a href="https://github.com/japoeder" target="_blank" rel="noopener noreferrer" title="GitHub"><i class="fab fa-github"></i></a>
-            <a href="https://www.linkedin.com/in/jonathanpoeder" target="_blank" rel="noopener noreferrer" title="LinkedIn"><i class="fab fa-linkedin"></i></a>
-            <a href="https://www.instagram.com/jp_and_charlie" target="_blank" rel="noopener noreferrer" title="Instagram"><i class="fab fa-instagram"></i></a>
-            <a href="mailto:japoeder@gmail.com" title="Email"><i class="fas fa-envelope"></i></a>
-          </div>
-        </div>
+        <div><div class="k">Email</div><div class="v"><a href="mailto:japoeder@gmail.com">japoeder@gmail.com</a></div></div>
+        <div><div class="k">Based in</div><div class="v">Chicago, Illinois</div></div>
+        <div><div class="k">Elsewhere</div><div class="v socials">
+          <a href="https://github.com/japoeder" target="_blank" rel="noopener noreferrer" title="GitHub"><i class="fab fa-github"></i></a>
+          <a href="https://www.linkedin.com/in/jonathanpoeder" target="_blank" rel="noopener noreferrer" title="LinkedIn"><i class="fab fa-linkedin"></i></a>
+          <a href="https://www.instagram.com/jp_and_charlie" target="_blank" rel="noopener noreferrer" title="Instagram"><i class="fab fa-instagram"></i></a>
+          <a href="mailto:japoeder@gmail.com" title="Email"><i class="fas fa-envelope"></i></a>
+        </div></div>
       </div>
     </div>
-  </section>
-
-  <!-- ===================== FOOTER ===================== -->
-  <footer class="foot">
-    <div class="wrap">
+    <div class="wrap footer-bar">
       <span class="mono">© 2026 Jonathan Poeder</span>
-      <span class="mono">Designed &amp; built in Chicago · <a href="/projects/">Portfolio</a></span>
+      <span class="mono">Built in Chicago · <a href="/projects/">Portfolio</a></span>
     </div>
   </footer>
 
-  <script>
-    // mobile nav
-    const toggle = document.getElementById('navToggle');
-    const links = document.getElementById('navLinks');
-    toggle && toggle.addEventListener('click', () => links.classList.toggle('open'));
-    links && links.querySelectorAll('a').forEach(a => a.addEventListener('click', () => links.classList.remove('open')));
-
-    // nav appearance over dark hero
-    const nav = document.getElementById('nav');
-    const hero = document.querySelector('.hero, .page-hero');
-    if (hero) {
-      const io = new IntersectionObserver(([e]) => {
-        nav.classList.toggle('on-dark', e.isIntersecting && e.intersectionRatio > 0.05);
-      }, { threshold: [0, 0.05, 0.1] });
-      io.observe(hero);
-    }
-
-    // scroll reveal
-    const revs = document.querySelectorAll('.reveal');
-    const ro = new IntersectionObserver((entries) => {
-      entries.forEach(en => { if (en.isIntersecting) { en.target.classList.add('in'); ro.unobserve(en.target); } });
-    }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
-    revs.forEach(r => ro.observe(r));
-  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="/assets/js/site.js"></script>
 </body>
 </html>

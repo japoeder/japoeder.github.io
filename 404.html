@@ -7,29 +7,31 @@
   <link rel="icon" type="image/x-icon" href="/assets/img/favicon.ico">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=Archivo+Expanded:wght@500;600;700;800;900&family=Inter+Tight:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Expanded:wght@600;700;800&family=Hanken+Grotesk:wght@400;500;600;700;800&family=Inter+Tight:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/fabric.css">
   <style>
-    .err {
-      min-height: 100svh; background: var(--black); color: #fff;
-      display: flex; flex-direction: column; align-items: flex-start; justify-content: center;
-    }
-    .err h1 {
-      font-family: var(--display); font-stretch: 125%; font-weight: 900; text-transform: uppercase;
-      font-size: clamp(5rem, 28vw, 22rem); line-height: 0.85; letter-spacing: -0.03em; margin: 0;
-    }
+    .err { position: relative; min-height: 100svh; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; overflow: hidden; }
+    .err .blob-canvas { position: absolute; right: -8%; top: 50%; transform: translateY(-50%); width: min(60vw,560px); height: min(60vw,560px); z-index: 0; opacity: 0.9; }
+    .err .wrap { position: relative; z-index: 2; }
+    .err h1 { font-family: var(--display); font-weight: 700; font-size: clamp(5rem, 26vw, 20rem); line-height: 0.85; letter-spacing: -0.05em; }
     .err h1 .accent { color: var(--accent); }
-    .err p { color: rgba(255,255,255,0.7); max-width: 44ch; margin: 1.5rem 0 2.5rem; font-size: 1.15rem; }
+    .err p { color: var(--muted); max-width: 44ch; margin: 1.4rem 0 2.2rem; font-size: 1.1rem; }
+    .err .back { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; border: 1px solid var(--line-2); border-radius: 100px; padding: 0.8rem 1.3rem; display: inline-flex; gap: 0.6rem; }
+    .err .back:hover { background: var(--ink); color: #fff; border-color: var(--ink); }
   </style>
 </head>
 <body>
   <section class="err">
+    <div class="gridlines"><span></span><span></span><span></span></div>
+    <canvas class="blob-canvas" data-blob data-color="#f37021" data-detail="4"></canvas>
     <div class="wrap">
-      <div class="mono" style="color:var(--accent); margin-bottom:1.5rem;">Error 404</div>
-      <h1>Lost<span class="accent">.</span></h1>
+      <div class="mono" style="color:var(--accent); margin-bottom:1.2rem;">Error 404</div>
+      <h1>404<span class="accent">.</span></h1>
       <p>This page wandered off the model. Let's get you back to something that exists.</p>
-      <a class="btn btn-accent" href="/">Back home <span class="arr">→</span></a>
+      <a class="back" href="/">← Back home</a>
     </div>
   </section>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="/assets/js/site.js"></script>
 </body>
 </html>
