@@ -95,7 +95,9 @@
 
     var scene = new THREE.Scene();
     var camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
-    camera.position.z = 3.1;
+    // distance chosen so the fully-morphed blob (radius up to ~1.35) always
+    // sits inside the frame with margin — avoids hard clipping at canvas edges
+    camera.position.z = 4.4;
 
     var geometry = new THREE.IcosahedronGeometry(1, detail);
     var base = geometry.attributes.position.array.slice(0);
@@ -119,7 +121,7 @@
 
     function frame(t) {
       var time = t * 0.00016;
-      var amp = 0.34, freq = 1.05;
+      var amp = 0.3, freq = 1.05;
       for (var i = 0; i < count; i++) {
         var ix = i * 3;
         v.set(base[ix], base[ix + 1], base[ix + 2]);

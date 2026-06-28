@@ -127,7 +127,7 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; font-weight: 700; lette
 .blob-wrap {
   position: absolute; inset: 0; z-index: 1; display: grid; place-items: center; pointer-events: none;
 }
-.blob-canvas { width: min(70vh, 60vw, 720px); height: min(70vh, 60vw, 720px); }
+.blob-canvas { width: min(86vh, 74vw, 880px); height: min(86vh, 74vw, 880px); }
 /* cardinal node squares around blob */
 .node { position: absolute; width: 11px; height: 11px; background: var(--black); z-index: 3; }
 
