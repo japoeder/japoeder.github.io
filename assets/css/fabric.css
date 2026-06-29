@@ -128,8 +128,8 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; font-weight: 700; lette
   position: absolute; inset: 0; z-index: 1; display: grid; place-items: center; pointer-events: none;
 }
 .blob-canvas { width: min(86vh, 74vw, 880px); height: min(86vh, 74vw, 880px); }
-/* cardinal node squares around blob */
-.node { position: absolute; width: 11px; height: 11px; background: var(--black); z-index: 3; }
+/* node-graph overlay (connector traces + node squares, drawn on canvas) */
+.connectors { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; }
 
 /* corner cards */
 .quad {
@@ -176,7 +176,7 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; font-weight: 700; lette
   .hero-inner { min-height: auto; }
   .blob-wrap { position: relative; inset: auto; height: 56vw; max-height: 420px; margin-top: 1rem; }
   .blob-canvas { width: 70vw; height: 70vw; max-width: 360px; max-height: 360px; }
-  .node { display: none; }
+  .connectors { display: none; }
   .quad { position: static; width: 100%; max-width: none; text-align: left !important; padding-inline: var(--pad); }
   .quad.tr .card-label, .quad.br .card-label { flex-direction: row; }
   .quad .card-desc, .quad.tr .card-desc, .quad.br .card-desc { margin-left: 0; max-width: none; }

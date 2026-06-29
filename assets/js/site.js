@@ -183,10 +183,66 @@
     if (reduceMotion) draw(0); else raf = requestAnimationFrame(draw);
   }
 
+  /* ---------------------- node-graph connectors (hero) ---------------------- */
+  // Lines and node squares are drawn on the SAME canvas in pixel space, so the
+  // traces always terminate exactly on the squares (no SVG percentage / aspect
+  // mismatch). Each trace sweeps in horizontally from a screen edge and eases
+  // into its node with a single quadratic curve — the Fabric "circuit" look.
+  function initConnectors(canvas) {
+    var ctx = canvas.getContext('2d');
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var W, H;
+
+    // node squares form a tidy diamond around the centered blob (fractions of hero)
+    var nodes = [
+      { x: 0.355, y: 0.34 }, // top-left
+      { x: 0.645, y: 0.34 }, // top-right
+      { x: 0.355, y: 0.66 }, // bottom-left
+      { x: 0.645, y: 0.66 }  // bottom-right
+    ];
+    // a: edge anchor where the trace begins, c: control point (sets the ease)
+    var conns = [
+      { a: [0.00, 0.27], c: [0.27, 0.27], n: 0 },
+      { a: [1.00, 0.27], c: [0.73, 0.27], n: 1 },
+      { a: [0.00, 0.73], c: [0.27, 0.73], n: 2 },
+      { a: [1.00, 0.73], c: [0.73, 0.73], n: 3 }
+    ];
+
+    var black = (getComputedStyle(document.documentElement).getPropertyValue('--black') || '#111317').trim() || '#111317';
+
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+      ctx.strokeStyle = 'rgba(17,19,23,0.12)';
+      ctx.lineWidth = 1;
+      conns.forEach(function (cn) {
+        var n = nodes[cn.n];
+        ctx.beginPath();
+        ctx.moveTo(cn.a[0] * W, cn.a[1] * H);
+        ctx.quadraticCurveTo(cn.c[0] * W, cn.c[1] * H, n.x * W, n.y * H);
+        ctx.stroke();
+      });
+      var s = 11;
+      ctx.fillStyle = black;
+      nodes.forEach(function (n) {
+        ctx.fillRect(Math.round(n.x * W - s / 2), Math.round(n.y * H - s / 2), s, s);
+      });
+    }
+    function resize() {
+      var r = canvas.getBoundingClientRect();
+      W = r.width; H = r.height;
+      canvas.width = W * dpr; canvas.height = H * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      draw();
+    }
+    resize();
+    window.addEventListener('resize', resize);
+  }
+
   /* ---------------------- boot ---------------------- */
   function boot() {
     document.querySelectorAll('canvas[data-blob]').forEach(function (c) { try { initBlob(c); } catch (e) {} });
     document.querySelectorAll('canvas[data-lines]').forEach(function (c) { try { initLines(c); } catch (e) {} });
+    document.querySelectorAll('canvas[data-connectors]').forEach(function (c) { try { initConnectors(c); } catch (e) {} });
 
     // mobile cards: swap absolute corner cards for stacked list under ~900px
     var mq = window.matchMedia('(max-width: 900px)');
