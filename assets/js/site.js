@@ -186,8 +186,8 @@
   /* ---------------------- node-graph connectors (hero) ---------------------- */
   // Lines and node squares are drawn on the SAME canvas in pixel space, so the
   // traces always terminate exactly on the squares (no SVG percentage / aspect
-  // mismatch). Like Fabric, each trace leaves its section card horizontally and
-  // kinks (a rounded right-angle bend) into the node square.
+  // mismatch). Like Fabric, each trace leaves its section card horizontally,
+  // then makes a sharp 45° kink that runs diagonally into the node square.
   function initConnectors(canvas) {
     var ctx = canvas.getContext('2d');
     var dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -215,15 +215,16 @@
       ctx.clearRect(0, 0, W, H);
       ctx.strokeStyle = 'rgba(17,19,23,0.12)';
       ctx.lineWidth = 1;
-      var r = 0.022 * Math.min(W, H); // rounded kink radius
       conns.forEach(function (cn) {
         var n = nodes[cn.n];
         var sx = cn.card[0] * W, sy = cn.card[1] * H;
         var nx = n.x * W, ny = n.y * H;
+        var diag = Math.abs(ny - sy);            // 45° leg: equal run & rise
+        var kx = nx - (nx >= sx ? diag : -diag); // kink point on the card's row
         ctx.beginPath();
         ctx.moveTo(sx, sy);
-        ctx.arcTo(nx, sy, nx, ny, r); // horizontal leg + rounded kink at node x
-        ctx.lineTo(nx, ny);           // vertical leg into the node
+        ctx.lineTo(kx, sy); // horizontal leg from the card
+        ctx.lineTo(nx, ny); // 45° diagonal into the node
         ctx.stroke();
       });
       var s = 11;
