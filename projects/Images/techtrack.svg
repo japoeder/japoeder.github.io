@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" role="img" aria-labelledby="t">
+  <title id="t">Stylized warehouse aisle with detection boxes drawn around a worker, a forklift, and a stack of boxes</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1b1f26"/><stop offset="1" stop-color="#101216"/></linearGradient>
+    <clipPath id="fl"><rect x="0" y="520" width="1280" height="200"/></clipPath>
+    <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#20252d"/><stop offset="1" stop-color="#15181d"/></linearGradient>
+  </defs>
+  <rect width="1280" height="720" fill="url(#bg)"/>
+  <polygon points="0,520 1280,520 1280,720 0,720" fill="url(#floor)"/>
+  <g stroke="#2c323c" stroke-width="2" clip-path="url(#fl)">
+    <line x1="640" y1="300" x2="-200" y2="720"/><line x1="640" y1="300" x2="300" y2="720"/>
+    <line x1="640" y1="300" x2="980" y2="720"/><line x1="640" y1="300" x2="1480" y2="720"/>
+    <line x1="0" y1="580" x2="1280" y2="580"/><line x1="0" y1="650" x2="1280" y2="650"/>
+  </g>
+  <!-- left rack -->
+  <g fill="#3a414c">
+    <rect x="50" y="110" width="12" height="420"/><rect x="190" y="110" width="12" height="420"/><rect x="320" y="110" width="12" height="420"/>
+    <rect x="50" y="200" width="282" height="9"/><rect x="50" y="300" width="282" height="9"/><rect x="50" y="400" width="282" height="9"/><rect x="50" y="510" width="282" height="9"/>
+  </g>
+  <g fill="#5a616c">
+    <rect x="72" y="150" width="50" height="50" rx="3"/><rect x="128" y="165" width="52" height="35" rx="3"/><rect x="212" y="140" width="96" height="60" rx="3"/>
+    <rect x="72" y="248" width="104" height="52" rx="3"/><rect x="212" y="262" width="44" height="38" rx="3"/><rect x="262" y="250" width="48" height="50" rx="3"/>
+    <rect x="80" y="352" width="60" height="48" rx="3"/><rect x="212" y="340" width="100" height="60" rx="3"/>
+  </g>
+  <!-- right rack -->
+  <g fill="#3a414c">
+    <rect x="1000" y="110" width="12" height="420"/><rect x="1110" y="110" width="12" height="420"/><rect x="1218" y="110" width="12" height="420"/>
+    <rect x="1000" y="200" width="230" height="9"/><rect x="1000" y="300" width="230" height="9"/><rect x="1000" y="400" width="230" height="9"/><rect x="1000" y="510" width="230" height="9"/>
+  </g>
+  <g fill="#5a616c">
+    <rect x="1022" y="148" width="78" height="52" rx="3"/><rect x="1132" y="160" width="76" height="40" rx="3"/>
+    <rect x="1022" y="256" width="40" height="44" rx="3"/><rect x="1068" y="266" width="34" height="34" rx="3"/><rect x="1132" y="244" width="76" height="56" rx="3"/>
+    <rect x="1022" y="344" width="80" height="56" rx="3"/><rect x="1140" y="356" width="60" height="44" rx="3"/>
+  </g>
+  <!-- pallet stack -->
+  <g>
+    <rect x="384" y="500" width="176" height="14" fill="#6b5a45"/>
+    <rect x="392" y="514" width="20" height="10" fill="#6b5a45"/><rect x="462" y="514" width="20" height="10" fill="#6b5a45"/><rect x="532" y="514" width="20" height="10" fill="#6b5a45"/>
+    <rect x="390" y="430" width="80" height="70" rx="3" fill="#8a7a62"/><rect x="474" y="430" width="80" height="70" rx="3" fill="#7d6e58"/>
+    <rect x="404" y="362" width="76" height="66" rx="3" fill="#7d6e58"/><rect x="484" y="370" width="62" height="58" rx="3" fill="#8a7a62"/>
+    <rect x="390" y="463" width="80" height="6" fill="#a39274"/><rect x="474" y="463" width="80" height="6" fill="#968669"/>
+  </g>
+  <!-- worker -->
+  <g fill="#c7cad1">
+    <circle cx="688" cy="318" r="22"/>
+    <path d="M664 312 a24 24 0 0 1 48 0 z" fill="#e8b33a"/>
+    <rect x="660" y="346" width="56" height="104" rx="22"/>
+    <rect x="664" y="436" width="20" height="84" rx="8"/><rect x="692" y="436" width="20" height="84" rx="8"/>
+    <rect x="662" y="372" width="52" height="10" fill="#d9a531"/>
+  </g>
+  <!-- forklift -->
+  <g>
+    <rect x="796" y="290" width="12" height="226" fill="#5a616c"/>
+    <rect x="752" y="500" width="56" height="9" fill="#5a616c"/>
+    <path d="M840 330 h70 l14 70 h-84 z" fill="none" stroke="#9ea4ad" stroke-width="7" stroke-linejoin="round"/>
+    <rect x="818" y="398" width="120" height="86" rx="8" fill="#9ea4ad"/>
+    <circle cx="846" cy="500" r="23" fill="#2a2f37" stroke="#9ea4ad" stroke-width="5"/>
+    <circle cx="914" cy="500" r="23" fill="#2a2f37" stroke="#9ea4ad" stroke-width="5"/>
+  </g>
+  <!-- detections -->
+  <g fill="none" stroke="#f37021" stroke-width="4">
+    <rect x="374" y="346" width="196" height="184"/>
+    <rect x="648" y="288" width="80" height="240"/>
+    <rect x="744" y="280" width="206" height="252"/>
+  </g>
+  <g font-family="ui-monospace, Menlo, Consolas, monospace" font-size="17" font-weight="700" fill="#ffffff">
+    <rect x="372" y="314" width="198" height="32" fill="#f37021"/><text x="382" y="336">cardboard box .74</text>
+    <rect x="646" y="256" width="122" height="32" fill="#f37021"/><text x="656" y="278">person .67</text>
+    <rect x="810" y="248" width="142" height="32" fill="#f37021"/><text x="820" y="270">forklift .81</text>
+  </g>
+  <g font-family="ui-monospace, Menlo, Consolas, monospace" font-size="16" fill="#8b919a" letter-spacing="2">
+    <text x="50" y="80">TECHTRACK</text>
+    <text x="1230" y="80" text-anchor="end">YOLOV4-TINY / 416 / CPU</text>
+  </g>
+</svg>

@@ -287,6 +287,44 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; font-weight: 700; lette
 .page-hero h1 { font-size: clamp(3rem, 12vw, 9rem); font-weight: 700; letter-spacing: -0.045em; line-height: 0.9; }
 .page-hero .ph-sub { max-width: 28ch; margin-top: clamp(3rem, 9vw, 7rem); font-family: var(--display); font-weight: 500; font-size: clamp(1.3rem, 2.6vw, 2.1rem); line-height: 1.12; letter-spacing: -0.03em; }
 
+/* ------------------- case studies ---------------------- */
+.case-group { margin-top: clamp(2.8rem, 5.5vw, 4.5rem); }
+.case-group .sub-group { margin-bottom: 0.6rem; }
+.case-group-note { color: var(--muted); font-size: 0.96rem; max-width: 62ch; margin: 0 0 clamp(1.4rem, 3vw, 2rem); }
+.page-hero .ph-eyebrow { color: var(--accent); margin-bottom: 1.4rem; }
+.case-meta { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--line); border-left: 1px solid var(--line); }
+.case-meta > div { padding: clamp(1.1rem, 2.2vw, 1.6rem); border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.case-meta .k { font-family: var(--mono); font-size: 0.64rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted-2); margin-bottom: 0.5rem; }
+.case-meta .v { font-size: 0.96rem; color: var(--ink-soft); line-height: 1.45; }
+@media (max-width: 860px) { .case-meta { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 520px) { .case-meta { grid-template-columns: 1fr; } }
+.case-prose { max-width: 70ch; }
+.case-prose p { color: var(--ink-soft); margin: 0 0 1.15rem; }
+.case-prose p:last-child { margin-bottom: 0; }
+.case-bullets { list-style: none; padding: 0; margin: 0 0 1.15rem; }
+.case-bullets li { position: relative; padding: 0.7rem 0 0.7rem 1.6rem; border-bottom: 1px solid var(--line); color: var(--ink-soft); }
+.case-bullets li:last-child { border-bottom: 0; }
+.case-bullets li::before { content: ""; position: absolute; left: 0; top: 1.25rem; width: 7px; height: 7px; background: var(--accent); }
+.case-steps { list-style: none; padding: 0; margin: clamp(1.6rem, 3vw, 2.4rem) 0 0; counter-reset: step; border-top: 1px solid var(--line); }
+.case-steps > li { display: grid; grid-template-columns: 46px 1fr; gap: 1rem; padding: 1.5rem 0; border-bottom: 1px solid var(--line); counter-increment: step; }
+.case-steps > li::before { content: counter(step, decimal-leading-zero); font-family: var(--mono); font-size: 0.74rem; color: var(--accent); padding-top: 0.35rem; }
+.case-steps h3 { font-size: 1.12rem; font-weight: 600; letter-spacing: -0.025em; margin-bottom: 0.5rem; }
+.case-steps p { color: var(--ink-soft); margin: 0; max-width: 70ch; }
+.case-figure { margin: 1.4rem 0 0; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: clamp(1rem, 2.4vw, 1.6rem); max-width: 760px; }
+.case-figure svg { width: 100%; height: auto; display: block; }
+.case-figure svg .pt { cursor: default; }
+.case-figure svg .pt:hover circle { r: 7; }
+.case-figure figcaption { font-size: 0.86rem; color: var(--muted); margin-top: 0.8rem; }
+.case-figure details { margin-top: 0.7rem; font-size: 0.86rem; color: var(--muted); }
+.case-figure summary { cursor: pointer; font-family: var(--mono); font-size: 0.64rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); }
+.case-figure table { border-collapse: collapse; margin-top: 0.6rem; font-variant-numeric: tabular-nums; }
+.case-figure th, .case-figure td { padding: 0.3rem 1rem 0.3rem 0; text-align: right; border-bottom: 1px solid var(--line); }
+.case-findings { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1.2rem, 2.5vw, 2rem); margin-top: clamp(1.6rem, 3vw, 2.4rem); }
+.case-findings > div { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: clamp(1.3rem, 2.4vw, 1.9rem); }
+.case-findings h3 { font-size: 1.12rem; font-weight: 600; letter-spacing: -0.025em; line-height: 1.1; margin-bottom: 0.75rem; }
+.case-findings p { font-size: 0.94rem; color: var(--muted); margin: 0; }
+@media (max-width: 960px) { .case-findings { grid-template-columns: 1fr; } }
+
 /* ------------------------ footer (dark) ---------------- */
 .footer { background: var(--black); color: rgba(255,255,255,0.78); position: relative; overflow: hidden; }
 .footer .eyebrow { color: var(--accent); }

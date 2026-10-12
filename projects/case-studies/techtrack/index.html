@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>TechTrack | Jonathan Poeder</title>
+  <meta name="author" content="Jonathan Poeder">
+  <meta name="description" content="TechTrack, a Johns Hopkins case study by Jonathan Poeder. A CPU-only object detection service for warehouse robots and the design analysis behind each of its thresholds.">
+  <link rel="icon" type="image/svg+xml" href="/assets/img/favicon.svg?v=3">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png?v=3">
+  <link rel="apple-touch-icon" href="/assets/img/favicon-180.png?v=3">
+  <link rel="canonical" href="https://jonathanpoeder.com/projects/case-studies/techtrack/">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Expanded:wght@600;700;800&family=Hanken+Grotesk:wght@400;500;600;700;800&family=Inter+Tight:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="/assets/css/fabric.css?v=7">
+</head>
+<body>
+
+  <!-- ===================== NAV ===================== -->
+  <nav class="nav" id="nav">
+    <div class="wrap">
+      <a class="brand" href="/"><span class="mark">JP</span>Jonathan&nbsp;Poeder<span class="dot">.</span></a>
+      <button class="nav-toggle" id="navToggle" aria-label="Menu"><span></span><span></span><span></span></button>
+      <div class="nav-links" id="navLinks">
+        <a href="/#about">About</a>
+        <a href="/#focus">Focus</a>
+        <a href="/#experience">Experience</a>
+        <a href="/projects/">Portfolio</a>
+        <a class="cta" href="#contact"><span class="sq"></span> Get in touch</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===================== PAGE HERO ===================== -->
+  <header class="page-hero">
+    <div class="gridlines"><span></span><span></span><span></span></div>
+    <canvas class="lines-canvas" data-lines></canvas>
+    <div class="wrap">
+      <div class="mono ph-eyebrow">Johns Hopkins case study</div>
+      <h1>TechTrack</h1>
+      <p class="ph-sub">Real-time object detection for warehouse robots, on CPU.</p>
+    </div>
+  </header>
+
+  <!-- ===================== OVERVIEW ===================== -->
+  <section class="block">
+    <div class="wrap">
+      <div class="case-meta reveal">
+        <div><div class="k">Course</div><div class="v">EN.705.603 Creating AI-Enabled Systems, Johns Hopkins, fall 2026</div></div>
+        <div><div class="k">Domain</div><div class="v">Computer vision for warehouse robotics</div></div>
+        <div><div class="k">Stack</div><div class="v">Python, OpenCV, YOLOv4-tiny, Docker</div></div>
+        <div><div class="k">Result</div><div class="v">41 of 41 autograder tests; design report 99/100</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PROBLEM ===================== -->
+  <section class="block">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div class="l"><span class="idx">01</span><h2>The problem</h2></div>
+      </div>
+      <div class="case-prose reveal">
+        <p>TechTrack is the first full case study in EN.705.603 (Creating AI-Enabled Systems), which I am taking at Johns Hopkins in fall 2026 as part of my MS in Artificial Intelligence. The scenario is a fleet of warehouse robots that have to find and label twenty kinds of objects (people, forklifts, pallets, boxes, safety gear, vehicles, signs) in a 30 frames per second camera feed, on CPU only, with a human review loop that turns the model's mistakes into retraining data.</p>
+        <p>The robot's planner stops or reroutes on every box it receives. A missed person is the most expensive error the system can make, and I set every threshold in the analysis against person recall first.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== WHAT I BUILT ===================== -->
+  <section class="block">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div class="l"><span class="idx">02</span><h2>What I built</h2></div>
+      </div>
+      <div class="case-prose reveal">
+        <p>I built the inference service in Python and OpenCV, then the evaluation and retraining pieces around it.</p>
+        <ul class="case-bullets">
+          <li>Preprocessing, a YOLOv4-tiny detector, and non-maximum suppression (NMS), all running on CPU</li>
+          <li>IoU matching, per-class precision-recall curves, and 11-point mean average precision (mAP)</li>
+          <li>The YOLO loss, split into its localization, objectness, no-object, and classification terms</li>
+          <li>A hard negative miner that ranks images by that loss</li>
+          <li>Augmentation transforms (blur, brightness, contrast, flips) and the Docker packaging</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== DESIGN ANALYSIS ===================== -->
+  <section class="block">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div class="l"><span class="idx">03</span><h2>The design analysis</h2></div>
+      </div>
+      <div class="case-prose reveal">
+        <p>Both candidate models arrived trained, so the analysis tunes the system around them rather than the networks. I ran each model once over the 9,525-image logistics dataset, cached every candidate box above 0.01 objectness, and made each later experiment a re-read of that cache. An evaluation went from two minutes to about two seconds on my laptop.</p>
+      </div>
+      <ol class="case-steps reveal">
+        <li><div>
+          <h3>Model selection</h3>
+          <p>Model 2 led model 1 on mAP (0.583 against 0.544), was ahead or level on all 20 classes, and kept the lead under every match IoU and score threshold I tried. I set the deployed objectness threshold at 0.25, where person recall stays within 0.02 of its best and the planner gets 3.5 boxes per frame instead of 8.6.</p>
+        </div></li>
+        <li><div>
+          <h3>Sampling strategy</h3>
+          <p>I drew a 5,000-image working sample stratified by the rarest class in each image, using label counts only. It keeps every ladder, gloves, and freight container image. On the ten rarest classes its AP error against the full set is half that of a uniform sample for model 2.</p>
+        </div></li>
+        <li><div>
+          <h3>NMS threshold</h3>
+          <p>A sweep from 0.1 to 0.9 found a flat top between 0.4 and 0.6 that held on the 4,525 images outside the sample and at the score thresholds the service would run, so I kept 0.5 in the middle of the plateau.</p>
+          <figure class="case-figure">
+            <svg viewBox="0 0 700 312" role="img" aria-labelledby="nmsTitle nmsDesc">
+              <title id="nmsTitle">mAP against the NMS IoU threshold</title>
+              <desc id="nmsDesc">Line chart. mAP rises from 0.545 at an NMS threshold of 0.1 to a flat top of 0.572 at 0.5 and 0.571 at 0.6, then falls to 0.468 at 0.9.</desc>
+              <rect x="290" y="20" width="156" height="250" fill="rgba(243,112,33,0.08)"/>
+              <g stroke="rgba(17,19,23,0.09)" stroke-width="1">
+                <line x1="56" y1="20" x2="680" y2="20"/><line x1="56" y1="103.3" x2="680" y2="103.3"/><line x1="56" y1="186.7" x2="680" y2="186.7"/><line x1="56" y1="270" x2="680" y2="270"/>
+              </g>
+              <g font-family="Space Mono, ui-monospace, monospace" font-size="12" fill="#6b7077">
+                <text x="46" y="24" text-anchor="end">0.60</text><text x="46" y="107" text-anchor="end">0.55</text><text x="46" y="191" text-anchor="end">0.50</text><text x="46" y="274" text-anchor="end">0.45</text>
+                <text x="56" y="290" text-anchor="middle">0.1</text><text x="134" y="290" text-anchor="middle">0.2</text><text x="212" y="290" text-anchor="middle">0.3</text><text x="290" y="290" text-anchor="middle">0.4</text><text x="368" y="290" text-anchor="middle">0.5</text><text x="446" y="290" text-anchor="middle">0.6</text><text x="524" y="290" text-anchor="middle">0.7</text><text x="602" y="290" text-anchor="middle">0.8</text><text x="680" y="290" text-anchor="middle">0.9</text>
+                <text x="368" y="309" text-anchor="middle">NMS IoU threshold</text>
+                <text x="368" y="36" text-anchor="middle">plateau 0.4 to 0.6</text>
+              </g>
+              <polyline points="56,111.7 134,106.7 212,80 290,75 368,66.7 446,68.3 524,88.3 602,141.7 680,240" fill="none" stroke="#f37021" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+              <g fill="#f37021" stroke="#ffffff" stroke-width="2">
+                <g class="pt"><title>NMS 0.1: mAP 0.545</title><circle cx="56" cy="111.7" r="5"/></g>
+                <g class="pt"><title>NMS 0.2: mAP 0.548</title><circle cx="134" cy="106.7" r="5"/></g>
+                <g class="pt"><title>NMS 0.3: mAP 0.564</title><circle cx="212" cy="80" r="5"/></g>
+                <g class="pt"><title>NMS 0.4: mAP 0.567</title><circle cx="290" cy="75" r="5"/></g>
+                <g class="pt"><title>NMS 0.5: mAP 0.572</title><circle cx="368" cy="66.7" r="5"/></g>
+                <g class="pt"><title>NMS 0.6: mAP 0.571</title><circle cx="446" cy="68.3" r="5"/></g>
+                <g class="pt"><title>NMS 0.7: mAP 0.559</title><circle cx="524" cy="88.3" r="5"/></g>
+                <g class="pt"><title>NMS 0.8: mAP 0.527</title><circle cx="602" cy="141.7" r="5"/></g>
+                <g class="pt"><title>NMS 0.9: mAP 0.468</title><circle cx="680" cy="240" r="5"/></g>
+              </g>
+              <g font-family="Space Mono, ui-monospace, monospace" font-size="12" fill="#111317">
+                <text x="368" y="56" text-anchor="middle">0.572</text>
+                <text x="668" y="232" text-anchor="end">0.468</text>
+              </g>
+            </svg>
+            <figcaption>mAP at a 0.5 match IoU against the NMS threshold, model 2, on the 5,000-image sample with a 0.05 score threshold.</figcaption>
+            <details>
+              <summary>Show the numbers</summary>
+              <table>
+                <thead><tr><th>NMS IoU</th><th>mAP</th></tr></thead>
+                <tbody>
+                  <tr><td>0.1</td><td>0.545</td></tr><tr><td>0.2</td><td>0.548</td></tr><tr><td>0.3</td><td>0.564</td></tr>
+                  <tr><td>0.4</td><td>0.567</td></tr><tr><td>0.5</td><td>0.572</td></tr><tr><td>0.6</td><td>0.571</td></tr>
+                  <tr><td>0.7</td><td>0.559</td></tr><tr><td>0.8</td><td>0.527</td></tr><tr><td>0.9</td><td>0.468</td></tr>
+                </tbody>
+              </table>
+            </details>
+          </figure>
+        </div></li>
+        <li><div>
+          <h3>Augmentation tests</h3>
+          <p>Heavy blur cost 0.17 mAP and darkening cost 0.11, while a horizontal flip changed nothing and a vertical flip cost 0.25 (an upside-down aisle is a view the robot never sees, so vertical flips stay out of retraining). Boxes per frame fell 26 to 55 percent under blur and darkness, which makes the box count a cheap online signal that the camera or the lighting has changed.</p>
+        </div></li>
+        <li><div>
+          <h3>Hard negative mining weights</h3>
+          <p>I scored all 5,000 images under seven sets of loss weights and compared the 500 hardest images each one selects, then repeated the ranking with the loss divided by the number of objects in the image.</p>
+        </div></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ===================== FINDINGS ===================== -->
+  <section class="block">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div class="l"><span class="idx">04</span><h2>What I found</h2></div>
+      </div>
+      <div class="stats reveal">
+        <div class="stat"><div class="num">0.583</div><div class="label">mAP for the selected model, against 0.544 for the other</div></div>
+        <div class="stat"><div class="num">0.25</div><div class="label">Deployed objectness threshold, set on person recall</div></div>
+        <div class="stat"><div class="num">41<span class="accent">%</span></div><div class="label">Wood pallets with a candidate box at the match threshold</div></div>
+        <div class="stat"><div class="num">25<span class="accent">/500</span></div><div class="label">Hard images shared by the raw and per-object rankings</div></div>
+      </div>
+      <div class="case-findings reveal">
+        <div>
+          <h3>The worst class is not a threshold problem</h3>
+          <p>Wood pallets have the most labeled boxes in the dataset and one of the lowest APs (about 0.3), and no NMS setting moves them. When I measured the best candidate box for each pallet, only 41 percent had one at the 0.5 match threshold and 22 percent had nothing overlapping at all. That is a labeling and retraining problem, and the design routes it to the human review queue.</p>
+        </div>
+        <div>
+          <h3>The NMS curve is lopsided</h3>
+          <p>Setting the NMS threshold too low cost 0.03 mAP from merged neighbors. Setting it too high cost 0.10 from duplicate boxes on every object. Sparse classes like car and gloves ignore the setting until 0.8, while crowded ones like person and helmet need at least 0.3.</p>
+        </div>
+        <div>
+          <h3>Summed loss mines crowds</h3>
+          <p>Ranked by total loss the hardest 500 images average 20 objects each against 4 for the dataset (mostly pallet stacks), and the loss weights I tried keep 90 to 99 percent of that set. Dividing the loss by the object count selects an almost entirely different set (25 images in common) led by fire and the other low-AP classes. I would make that switch the miner's first configuration option.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== NOTES ===================== -->
+  <section class="block" style="border-bottom:0;">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div class="l"><span class="idx">05</span><h2>Limits and notes</h2></div>
+      </div>
+      <div class="case-prose reveal">
+        <p>The implementation passed all 41 autograder tests, and the design report scored 99 out of 100. The dataset is built from mosaic tiles rather than real warehouse frames, so the crowding and augmentation results describe that construction as much as a live camera. The timing (about 13 ms per frame against a 33 ms budget) is one laptop CPU, not the robot's.</p>
+        <p>Course repositories stay private under the university's rules, so this page summarizes my results and does not link the code.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== FOOTER / CONTACT ===================== -->
+  <footer class="footer" id="contact">
+    <canvas class="footer-blob" data-blob data-color="#f37021" data-detail="4"></canvas>
+    <div class="wrap footer-cta">
+      <div class="eyebrow mono reveal">Let's talk</div>
+      <h2 class="reveal">Let's work together<span class="accent">.</span></h2>
+      <p class="contact-note reveal">The best way to contact me is through email. Reach out if your organization needs data-science firepower.</p>
+      <div class="contact-meta reveal">
+        <div><div class="k">Email</div><div class="v"><a href="mailto:japoeder@gmail.com">japoeder@gmail.com</a></div></div>
+        <div><div class="k">Based in</div><div class="v">Chicago, Illinois</div></div>
+        <div><div class="k">Elsewhere</div><div class="v socials">
+          <a href="https://github.com/japoeder" target="_blank" rel="noopener noreferrer" title="GitHub"><i class="fab fa-github"></i></a>
+          <a href="https://www.linkedin.com/in/jonathanpoeder" target="_blank" rel="noopener noreferrer" title="LinkedIn"><i class="fab fa-linkedin"></i></a>
+          <a href="https://www.instagram.com/jp_and_charlie" target="_blank" rel="noopener noreferrer" title="Instagram"><i class="fab fa-instagram"></i></a>
+          <a href="mailto:japoeder@gmail.com" title="Email"><i class="fas fa-envelope"></i></a>
+        </div></div>
+      </div>
+    </div>
+    <div class="wrap footer-bar">
+      <span class="mono">© 2026 Jonathan Poeder</span>
+      <span class="mono"><a href="/projects/">← Back to portfolio</a></span>
+    </div>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="/assets/js/site.js?v=7"></script>
+</body>
+</html>
