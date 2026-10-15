@@ -60,7 +60,7 @@
         <div class="row">
           <label>Feature <select id="feature"></select></label>
           <button id="reset">optbinning splits</button>
-          <button id="mono">monotonic splits</button>
+          <button id="monobtn">monotonic splits</button>
           <button id="quant">equal-count splits</button>
           <button id="copy" class="pri">Copy bin table</button>
           <span class="mut" id="hint"></span>
@@ -175,7 +175,7 @@ svg.addEventListener('pointermove', ev => { if (drag === null) return; const d =
 svg.addEventListener('pointerup', () => { drag = null; });
 svg.addEventListener('dblclick', ev => { const d = DATA[feat]; if (d.kind !== 'num') return; splits.push(vOf(pt(ev), d)); splits.sort((a, b) => a - b); render(); });
 document.getElementById('reset').onclick = () => { splits = [...(DATA[feat].splits || [])]; render(); };
-document.getElementById('mono').onclick = () => { const d = DATA[feat]; if (d.kind !== 'num' || !d.splits_mono) return; splits = [...d.splits_mono]; render(); };
+document.getElementById("monobtn").onclick = () => { const d = DATA[feat]; if (d.kind !== 'num' || !d.splits_mono) return; splits = [...d.splits_mono]; render(); };
 document.getElementById('quant').onclick = () => { const d = DATA[feat]; if (d.kind !== 'num') return; const N = d.fraud.reduce((a, b, i) => a + b + d.legit[i], 0); let acc = 0, k = 1; splits = []; for (let i = 0; i < d.fraud.length; i++) { acc += d.fraud[i] + d.legit[i]; if (acc >= k * N / 6 && k < 6) { splits.push(d.edges[i + 1]); k++; } } render(); };
 document.getElementById('copy').onclick = () => { const rows = [...document.querySelectorAll('#tbl tr')].map(tr => [...tr.children].map(td => td.textContent).join('\t')).join('\n'); navigator.clipboard.writeText(`${feat}\tIV ${document.getElementById('iv').textContent}\n` + rows); document.getElementById('hint').textContent = 'copied'; };
 sel.onchange = () => { feat = sel.value; splits = [...(DATA[feat].splits || [])]; render(); };
