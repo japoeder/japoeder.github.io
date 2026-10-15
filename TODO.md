@@ -10,4 +10,5 @@
 
 ## Done
 
+- 🤖 2026-10-15: Downloadable resume (`assets/pdf/Jonathan-Poeder-Resume.pdf`, from the 2026-09-17 PDF) linked in the nav and contact section on every page (d32422f). To update it, replace that file and push.
 - 🤖 2026-10-11: TechTrack case study page and card (a7061f3).
