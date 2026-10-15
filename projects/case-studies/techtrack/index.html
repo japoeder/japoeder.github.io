@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Archivo+Expanded:wght@600;700;800&family=Hanken+Grotesk:wght@400;500;600;700;800&family=Inter+Tight:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/all.min.css">
-  <link rel="stylesheet" href="/assets/css/fabric.css?v=9">
+  <link rel="stylesheet" href="/assets/css/fabric.css?v=10">
 </head>
 <body>
 
@@ -103,6 +103,173 @@
         <li><div>
           <h3>Model selection</h3>
           <p>Model 2 led model 1 on mAP (0.583 against 0.544), was ahead or level on all 20 classes, and kept the lead under every match IoU and score threshold I tried. I set the deployed objectness threshold at 0.25, where person recall stays within 0.02 of its best and the planner gets 3.5 boxes per frame instead of 8.6.</p>
+
+          <figure class="case-figure">
+            <div class="viz"><svg viewBox="0 0 700 504" role="img" aria-labelledby="apTitle apDesc">
+<title id="apTitle">Per-class AP for model 1 and model 2</title>
+<desc id="apDesc">Dumbbell chart of 20 classes. Model 2 is ahead or level on every class; the largest gains are forklift, barcode, person, smoke and freight container. QR code is the one class where model 1 is ahead, by 0.001.</desc>
+<line x1="150.0" y1="20" x2="150.0" y2="474" stroke="rgba(17,19,23,0.09)"/>
+<text x="150.0" y="490" text-anchor="middle">0.0</text>
+<line x1="256.0" y1="20" x2="256.0" y2="474" stroke="rgba(17,19,23,0.09)"/>
+<text x="256.0" y="490" text-anchor="middle">0.2</text>
+<line x1="362.0" y1="20" x2="362.0" y2="474" stroke="rgba(17,19,23,0.09)"/>
+<text x="362.0" y="490" text-anchor="middle">0.4</text>
+<line x1="468.0" y1="20" x2="468.0" y2="474" stroke="rgba(17,19,23,0.09)"/>
+<text x="468.0" y="490" text-anchor="middle">0.6</text>
+<line x1="574.0" y1="20" x2="574.0" y2="474" stroke="rgba(17,19,23,0.09)"/>
+<text x="574.0" y="490" text-anchor="middle">0.8</text>
+<line x1="680.0" y1="20" x2="680.0" y2="474" stroke="rgba(17,19,23,0.09)"/>
+<text x="680.0" y="490" text-anchor="middle">1.0</text>
+<text x="415" y="503" text-anchor="middle">AP at match IoU 0.5</text>
+<text x="140" y="43.0" text-anchor="end" fill="#6b7077">wood pallet</text>
+<g class="pt"><title>wood pallet: model 1 0.273, model 2 0.307, 9,330 boxes</title><rect x="150" y="29.0" width="530" height="20" fill="transparent"/><line x1="294.7" y1="39.0" x2="312.7" y2="39.0" stroke="rgba(17,19,23,0.18)" stroke-width="2" stroke-linecap="round"/><circle cx="294.7" cy="39.0" r="5" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/><circle cx="312.7" cy="39.0" r="5" fill="#f37021" stroke="#ffffff" stroke-width="2"/>
+</g>
+<text x="140" y="65.0" text-anchor="end" fill="#111317">person</text>
+<g class="pt"><title>person: model 1 0.511, model 2 0.588, 6,368 boxes</title><rect x="150" y="51.0" width="530" height="20" fill="transparent"/><line x1="420.8" y1="61.0" x2="461.6" y2="61.0" stroke="rgba(243,112,33,0.08)" stroke-width="6" stroke-linecap="round"/><circle cx="420.8" cy="61.0" r="5" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/><circle cx="461.6" cy="61.0" r="5" fill="#f37021" stroke="#ffffff" stroke-width="2"/>
+<text x="471.6" y="65.0" fill="#111317">+0.08</text>
+</g>
+<text x="140" y="87.0" text-anchor="end" fill="#111317">cardboard box</text>
+<g class="pt"><title>cardboard box: model 1 0.723, model 2 0.782, 4,995 boxes</title><rect x="150" y="73.0" width="530" height="20" fill="transparent"/><line x1="533.2" y1="83.0" x2="564.5" y2="83.0" stroke="rgba(243,112,33,0.08)" stroke-width="6" stroke-linecap="round"/><circle cx="533.2" cy="83.0" r="5" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/><circle cx="564.5" cy="83.0" r="5" fill="#f37021" stroke="#ffffff" stroke-width="2"/>
+<text x="574.5" y="87.0" fill="#111317">+0.06</text>
+</g>
+<text x="140" y="109.0" text-anchor="end" fill="#111317">fire</text>
+<g class="pt"><title>fire: model 1 0.253, model 2 0.315, 2,793 boxes</title><rect x="150" y="95.0" width="530" height="20" fill="transparent"/><line x1="284.1" y1="105.0" x2="316.9" y2="105.0" stroke="rgba(243,112,33,0.08)" stroke-width="6" stroke-linecap="round"/><circle cx="284.1" cy="105.0" r="5" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/><circle cx="316.9" cy="105.0" r="5" fill="#f37021" stroke="#ffffff" stroke-width="2"/>
+<text x="326.9" y="109.0" fill="#111317">+0.06</text>
+</g>
+<text x="140" y="131.0" text-anchor="end" fill="#111317">helmet</text>
+<g class="pt"><title>helmet: model 1 0.470, model 2 0.528, 2,170 boxes</title><rect x="150" y="117.0" width="530" height="20" fill="transparent"/><line x1="399.1" y1="127.0" x2="429.8" y2="127.0" stroke="rgba(243,112,33,0.08)" stroke-width="6" stroke-linecap="round"/><circle cx="399.1" cy="127.0" r="5" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/><circle cx="429.8" cy="127.0" r="5" fill="#f37021" stroke="#ffffff" stroke-width="2"/>
+<text x="439.8" y="131.0" fill="#111317">+0.06</text>
+</g>
+<text x="140" y="153.0" text-anchor="end" fill="#111317">smoke</text>
+<g class="pt"><title>smoke: model 1 0.455, model 2 0.528, 1,495 boxes</title><rect x="150" y="139.0" width="530" height="20" fill="transparent"/><line x1="391.1" y1="149.0" x2="429.8" y2="149.0" stroke="rgba(243,112,33,0.08)" stroke-width="6" stroke-linecap="round"/><circle cx="391.1" cy="149.0" r="5" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/><circle cx="429.8" cy="149.0" r="5" fill="#f37021" stroke="#ffffff" stroke-width="2"/>
+<text x="439.8" y="153.0" fill="#111317">+0.07</text>
+</g>
+<text x="140" y="175.0" text-anchor="end" fill="#6b7077">car</text>
+<g class="pt"><title>car: model 1 0.674, model 2 0.684, 1,379 boxes</title><rect x="150" y="161.0" width="530" height="20" fill="transparent"/><line x1="507.2" y1="171.0" x2="512.5" y2="171.0" stroke="rgba(17,19,23,0.18)" stroke-width="2" stroke-linecap="round"/><circle cx="507.2" cy="171.0" r="5" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/><circle cx="512.5" cy="171.0" r="5" fill="#f37021" stroke="#ffffff" stroke-width="2"/>
+</g>
+<text x="140" y="197.0" text-anchor="end" fill="#6b7077">safety vest</text>
+<g class="pt"><title>safety vest: model 1 0.562, model 2 0.586, 1,260 boxes</title><rect x="150" y="183.0" width="530" height="20" fill="transparent"/><line x1="447.9" y1="193.0" x2="460.6" y2="193.0" stroke="rgba(17,19,23,0.18)" stroke-width="2" stroke-linecap="round"/><circle cx="447.9" cy="193.0" r="5" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/><circle cx="460.6" cy="193.0" r="5" fill="#f37021" stroke="#ffffff" stroke-width="2"/>
+</g>
+<text x="140" y="219.0" text-anchor="end" fill="#6b7077">traffic light</text>
+<g class="pt"><title>traffic light: model 1 0.782, model 2 0.793, 1,193 boxes</title><rect x="150" y="205.0" width="530" height="20" fill="transparent"/><line x1="564.5" y1="215.0" x2="570.3" y2="215.0" stroke="rgba(17,19,23,0.18)" stroke-width="2" stroke-linecap="round"/><circle cx="564.5" cy="215.0" r="5" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/><circle cx="570.3" cy="215.0" r="5" fill="#f37021" stroke="#ffffff" stroke-width="2"/>
+</g>
+<text x="140" y="241.0" text-anchor="end" fill="#111317">forklift</text>
+<g class="pt"><title>forklift: model 1 0.695, model 2 0.778, 1,103 boxes</title><rect x="150" y="227.0" width="530" height="20" fill="transparent"/><line x1="518.3" y1="237.0" x2="562.3" y2="237.0" stroke="rgba(243,112,33,0.08)" stroke-width="6" stroke-linecap="round"/><circle cx="518.3" cy="237.0" r="5" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/><circle cx="562.3" cy="237.0" r="5" fill="#f37021" stroke="#ffffff" stroke-width="2"/>
+<text x="572.3" y="241.0" fill="#111317">+0.08</text>
+</g>
+<text x="140" y="263.0" text-anchor="end" fill="#6b7077">truck</text>
+<g class="pt"><title>truck: model 1 0.765, model 2 0.768, 782 boxes</title><rect x="150" y="249.0" width="530" height="20" fill="transparent"/><line x1="555.5" y1="259.0" x2="557.0" y2="259.0" stroke="rgba(17,19,23,0.18)" stroke-width="2" stroke-linecap="round"/><circle cx="555.5" cy="259.0" r="5" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/><circle cx="557.0" cy="259.0" r="5" fill="#f37021" stroke="#ffffff" stroke-width="2"/>
+</g>
+<text x="140" y="285.0" text-anchor="end" fill="#6b7077">van</text>
+<g class="pt"><title>van: model 1 0.784, model 2 0.790, 765 boxes</title><rect x="150" y="271.0" width="530" height="20" fill="transparent"/><line x1="565.5" y1="281.0" x2="568.7" y2="281.0" stroke="rgba(17,19,23,0.18)" stroke-width="2" stroke-linecap="round"/><circle cx="565.5" cy="281.0" r="5" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/><circle cx="568.7" cy="281.0" r="5" fill="#f37021" stroke="#ffffff" stroke-width="2"/>
+</g>
+<text x="140" y="307.0" text-anchor="end" fill="#6b7077">road sign</text>
+<g class="pt"><title>road sign: model 1 0.213, model 2 0.219, 720 boxes</title><rect x="150" y="293.0" width="530" height="20" fill="transparent"/><line x1="262.9" y1="303.0" x2="266.1" y2="303.0" stroke="rgba(17,19,23,0.18)" stroke-width="2" stroke-linecap="round"/><circle cx="262.9" cy="303.0" r="5" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/><circle cx="266.1" cy="303.0" r="5" fill="#f37021" stroke="#ffffff" stroke-width="2"/>
+</g>
+<text x="140" y="329.0" text-anchor="end" fill="#6b7077">traffic cone</text>
+<g class="pt"><title>traffic cone: model 1 0.681, model 2 0.691, 506 boxes</title><rect x="150" y="315.0" width="530" height="20" fill="transparent"/><line x1="510.9" y1="325.0" x2="516.2" y2="325.0" stroke="rgba(17,19,23,0.18)" stroke-width="2" stroke-linecap="round"/><circle cx="510.9" cy="325.0" r="5" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/><circle cx="516.2" cy="325.0" r="5" fill="#f37021" stroke="#ffffff" stroke-width="2"/>
+</g>
+<text x="140" y="351.0" text-anchor="end" fill="#6b7077">qr code</text>
+<g class="pt"><title>qr code: model 1 0.760, model 2 0.759, 369 boxes</title><rect x="150" y="337.0" width="530" height="20" fill="transparent"/><line x1="552.8" y1="347.0" x2="552.3" y2="347.0" stroke="rgba(17,19,23,0.18)" stroke-width="2" stroke-linecap="round"/><circle cx="552.8" cy="347.0" r="5" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/><circle cx="552.3" cy="347.0" r="5" fill="#f37021" stroke="#ffffff" stroke-width="2"/>
+<text x="542.3" y="351.0" text-anchor="end" fill="#111317">model 1 ahead, 0.001</text>
+</g>
+<text x="140" y="373.0" text-anchor="end" fill="#111317">license plate</text>
+<g class="pt"><title>license plate: model 1 0.353, model 2 0.414, 359 boxes</title><rect x="150" y="359.0" width="530" height="20" fill="transparent"/><line x1="337.1" y1="369.0" x2="369.4" y2="369.0" stroke="rgba(243,112,33,0.08)" stroke-width="6" stroke-linecap="round"/><circle cx="337.1" cy="369.0" r="5" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/><circle cx="369.4" cy="369.0" r="5" fill="#f37021" stroke="#ffffff" stroke-width="2"/>
+<text x="379.4" y="373.0" fill="#111317">+0.06</text>
+</g>
+<text x="140" y="395.0" text-anchor="end" fill="#111317">freight container</text>
+<g class="pt"><title>freight container: model 1 0.236, model 2 0.305, 318 boxes</title><rect x="150" y="381.0" width="530" height="20" fill="transparent"/><line x1="275.1" y1="391.0" x2="311.6" y2="391.0" stroke="rgba(243,112,33,0.08)" stroke-width="6" stroke-linecap="round"/><circle cx="275.1" cy="391.0" r="5" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/><circle cx="311.6" cy="391.0" r="5" fill="#f37021" stroke="#ffffff" stroke-width="2"/>
+<text x="321.6" y="395.0" fill="#111317">+0.07</text>
+</g>
+<text x="140" y="417.0" text-anchor="end" fill="#111317">barcode</text>
+<g class="pt"><title>barcode: model 1 0.676, model 2 0.754, 283 boxes</title><rect x="150" y="403.0" width="530" height="20" fill="transparent"/><line x1="508.3" y1="413.0" x2="549.6" y2="413.0" stroke="rgba(243,112,33,0.08)" stroke-width="6" stroke-linecap="round"/><circle cx="508.3" cy="413.0" r="5" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/><circle cx="549.6" cy="413.0" r="5" fill="#f37021" stroke="#ffffff" stroke-width="2"/>
+<text x="559.6" y="417.0" fill="#111317">+0.08</text>
+</g>
+<text x="140" y="439.0" text-anchor="end" fill="#111317">ladder</text>
+<g class="pt"><title>ladder: model 1 0.385, model 2 0.436, 277 boxes</title><rect x="150" y="425.0" width="530" height="20" fill="transparent"/><line x1="354.1" y1="435.0" x2="381.1" y2="435.0" stroke="rgba(243,112,33,0.08)" stroke-width="6" stroke-linecap="round"/><circle cx="354.1" cy="435.0" r="5" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/><circle cx="381.1" cy="435.0" r="5" fill="#f37021" stroke="#ffffff" stroke-width="2"/>
+<text x="391.1" y="439.0" fill="#111317">+0.05</text>
+</g>
+<text x="140" y="461.0" text-anchor="end" fill="#6b7077">gloves</text>
+<g class="pt"><title>gloves: model 1 0.630, model 2 0.636, 256 boxes</title><rect x="150" y="447.0" width="530" height="20" fill="transparent"/><line x1="483.9" y1="457.0" x2="487.1" y2="457.0" stroke="rgba(17,19,23,0.18)" stroke-width="2" stroke-linecap="round"/><circle cx="483.9" cy="457.0" r="5" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/><circle cx="487.1" cy="457.0" r="5" fill="#f37021" stroke="#ffffff" stroke-width="2"/>
+</g>
+</svg></div>
+            <div class="viz-legend"><span><i style="background:#2a78d6"></i>model 1</span><span><i style="background:#f37021"></i>model 2</span></div>
+            <figcaption>I measured per-class AP at a 0.5 match IoU on all 9,525 images and ordered the classes by how many labeled boxes each one has, with the ten classes where model 2 gains more than 0.05 drawn heavier so the shape of the lead is visible at a glance. The gains land where I need them. Person and helmet and forklift matter for safety and cardboard box and freight container matter for the shipment, while the vehicle classes and the small markers sit within 0.01 of each other. QR code is the one class model 1 wins, by a rounding error.</figcaption>
+            <details>
+              <summary>Show the numbers</summary>
+              <div class="tbl"><table><thead><tr><th>class</th><th>boxes</th><th>AP model 1</th><th>AP model 2</th><th>delta</th></tr></thead><tbody><tr><td>wood pallet</td><td>9,330</td><td>0.273</td><td>0.307</td><td>+0.034</td></tr><tr><td>person</td><td>6,368</td><td>0.511</td><td>0.588</td><td>+0.077</td></tr><tr><td>cardboard box</td><td>4,995</td><td>0.723</td><td>0.782</td><td>+0.059</td></tr><tr><td>fire</td><td>2,793</td><td>0.253</td><td>0.315</td><td>+0.062</td></tr><tr><td>helmet</td><td>2,170</td><td>0.470</td><td>0.528</td><td>+0.058</td></tr><tr><td>smoke</td><td>1,495</td><td>0.455</td><td>0.528</td><td>+0.073</td></tr><tr><td>car</td><td>1,379</td><td>0.674</td><td>0.684</td><td>+0.010</td></tr><tr><td>safety vest</td><td>1,260</td><td>0.562</td><td>0.586</td><td>+0.024</td></tr><tr><td>traffic light</td><td>1,193</td><td>0.782</td><td>0.793</td><td>+0.011</td></tr><tr><td>forklift</td><td>1,103</td><td>0.695</td><td>0.778</td><td>+0.083</td></tr><tr><td>truck</td><td>782</td><td>0.765</td><td>0.768</td><td>+0.003</td></tr><tr><td>van</td><td>765</td><td>0.784</td><td>0.790</td><td>+0.006</td></tr><tr><td>road sign</td><td>720</td><td>0.213</td><td>0.219</td><td>+0.006</td></tr><tr><td>traffic cone</td><td>506</td><td>0.681</td><td>0.691</td><td>+0.010</td></tr><tr><td>qr code</td><td>369</td><td>0.760</td><td>0.759</td><td>-0.001</td></tr><tr><td>license plate</td><td>359</td><td>0.353</td><td>0.414</td><td>+0.061</td></tr><tr><td>freight container</td><td>318</td><td>0.236</td><td>0.305</td><td>+0.069</td></tr><tr><td>barcode</td><td>283</td><td>0.676</td><td>0.754</td><td>+0.078</td></tr><tr><td>ladder</td><td>277</td><td>0.385</td><td>0.436</td><td>+0.051</td></tr><tr><td>gloves</td><td>256</td><td>0.630</td><td>0.636</td><td>+0.006</td></tr><tr><td><b>mAP</b></td><td>36,721</td><td><b>0.544</b></td><td><b>0.583</b></td><td><b>+0.039</b></td></tr></tbody></table></div>
+            </details>
+          </figure>
+          <figure class="case-figure">
+            <div class="viz"><svg viewBox="0 0 700 300" role="img" aria-labelledby="opTitle opDesc">
+<title id="opTitle">Precision and recall against the objectness threshold</title>
+<desc id="opDesc">Two panels, person and all 20 classes. As the threshold rises from 0.05 to 0.5 precision climbs and recall falls; at the chosen 0.25 person recall is 0.620 against 0.638 at 0.05 and person precision is 0.673.</desc>
+<text x="60" y="22" fill="#111317">person</text>
+<line x1="60" y1="240.0" x2="330" y2="240.0" stroke="rgba(17,19,23,0.09)"/>
+<text x="52" y="244.0" text-anchor="end">0.4</text>
+<line x1="60" y1="194.7" x2="330" y2="194.7" stroke="rgba(17,19,23,0.09)"/>
+<text x="52" y="198.7" text-anchor="end">0.5</text>
+<line x1="60" y1="149.3" x2="330" y2="149.3" stroke="rgba(17,19,23,0.09)"/>
+<text x="52" y="153.3" text-anchor="end">0.6</text>
+<line x1="60" y1="104.0" x2="330" y2="104.0" stroke="rgba(17,19,23,0.09)"/>
+<text x="52" y="108.0" text-anchor="end">0.7</text>
+<line x1="60" y1="58.7" x2="330" y2="58.7" stroke="rgba(17,19,23,0.09)"/>
+<text x="52" y="62.7" text-anchor="end">0.8</text>
+<text x="87.0" y="258" text-anchor="middle">0.05</text>
+<text x="195.0" y="258" text-anchor="middle">0.25</text>
+<text x="330.0" y="258" text-anchor="middle">0.50</text>
+<text x="195" y="280" text-anchor="middle">objectness threshold</text>
+<line x1="195.0" y1="30" x2="195.0" y2="240" stroke="rgba(17,19,23,0.18)" stroke-dasharray="0" stroke-width="1"/>
+<text x="201.0" y="28" fill="#111317">deployed 0.25</text>
+<polyline points="87.0,132.6 114.0,132.6 195.0,116.2 330.0,55.0" fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<g class="pt"><title>person, threshold 0.05: precision 0.637</title><circle cx="87.0" cy="132.6" r="5" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/></g>
+<g class="pt"><title>person, threshold 0.10: precision 0.637</title><circle cx="114.0" cy="132.6" r="5" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/></g>
+<g class="pt"><title>person, threshold 0.25: precision 0.673</title><circle cx="195.0" cy="116.2" r="5" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/></g>
+<g class="pt"><title>person, threshold 0.50: precision 0.808</title><circle cx="330.0" cy="55.0" r="5" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/></g>
+<text x="185.0" y="107.2" text-anchor="end" fill="#111317">0.673</text>
+<polyline points="87.0,132.1 114.0,132.1 195.0,140.3 330.0,199.7" fill="none" stroke="#f37021" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<g class="pt"><title>person, threshold 0.05: recall 0.638</title><circle cx="87.0" cy="132.1" r="5" fill="#f37021" stroke="#ffffff" stroke-width="2"/></g>
+<g class="pt"><title>person, threshold 0.10: recall 0.638</title><circle cx="114.0" cy="132.1" r="5" fill="#f37021" stroke="#ffffff" stroke-width="2"/></g>
+<g class="pt"><title>person, threshold 0.25: recall 0.620</title><circle cx="195.0" cy="140.3" r="5" fill="#f37021" stroke="#ffffff" stroke-width="2"/></g>
+<g class="pt"><title>person, threshold 0.50: recall 0.489</title><circle cx="330.0" cy="199.7" r="5" fill="#f37021" stroke="#ffffff" stroke-width="2"/></g>
+<text x="185.0" y="158.3" text-anchor="end" fill="#111317">0.620</text>
+<text x="410" y="22" fill="#111317">all 20 classes</text>
+<line x1="410" y1="240.0" x2="680" y2="240.0" stroke="rgba(17,19,23,0.09)"/>
+<text x="402" y="244.0" text-anchor="end">0.4</text>
+<line x1="410" y1="194.7" x2="680" y2="194.7" stroke="rgba(17,19,23,0.09)"/>
+<text x="402" y="198.7" text-anchor="end">0.5</text>
+<line x1="410" y1="149.3" x2="680" y2="149.3" stroke="rgba(17,19,23,0.09)"/>
+<text x="402" y="153.3" text-anchor="end">0.6</text>
+<line x1="410" y1="104.0" x2="680" y2="104.0" stroke="rgba(17,19,23,0.09)"/>
+<text x="402" y="108.0" text-anchor="end">0.7</text>
+<line x1="410" y1="58.7" x2="680" y2="58.7" stroke="rgba(17,19,23,0.09)"/>
+<text x="402" y="62.7" text-anchor="end">0.8</text>
+<text x="437.0" y="258" text-anchor="middle">0.05</text>
+<text x="545.0" y="258" text-anchor="middle">0.25</text>
+<text x="680.0" y="258" text-anchor="middle">0.50</text>
+<text x="545" y="280" text-anchor="middle">objectness threshold</text>
+<line x1="545.0" y1="30" x2="545.0" y2="240" stroke="rgba(17,19,23,0.18)" stroke-dasharray="0" stroke-width="1"/>
+<text x="551.0" y="28" fill="#111317">deployed 0.25</text>
+<polyline points="437.0,153.4 464.0,153.4 545.0,133.9 680.0,65.0" fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<g class="pt"><title>all 20 classes, threshold 0.05: precision 0.591</title><circle cx="437.0" cy="153.4" r="5" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/></g>
+<g class="pt"><title>all 20 classes, threshold 0.10: precision 0.591</title><circle cx="464.0" cy="153.4" r="5" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/></g>
+<g class="pt"><title>all 20 classes, threshold 0.25: precision 0.634</title><circle cx="545.0" cy="133.9" r="5" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/></g>
+<g class="pt"><title>all 20 classes, threshold 0.50: precision 0.786</title><circle cx="680.0" cy="65.0" r="5" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/></g>
+<text x="535.0" y="124.9" text-anchor="end" fill="#111317">0.634</text>
+<polyline points="437.0,155.7 464.0,155.7 545.0,165.7 680.0,216.0" fill="none" stroke="#f37021" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<g class="pt"><title>all 20 classes, threshold 0.05: recall 0.586</title><circle cx="437.0" cy="155.7" r="5" fill="#f37021" stroke="#ffffff" stroke-width="2"/></g>
+<g class="pt"><title>all 20 classes, threshold 0.10: recall 0.586</title><circle cx="464.0" cy="155.7" r="5" fill="#f37021" stroke="#ffffff" stroke-width="2"/></g>
+<g class="pt"><title>all 20 classes, threshold 0.25: recall 0.564</title><circle cx="545.0" cy="165.7" r="5" fill="#f37021" stroke="#ffffff" stroke-width="2"/></g>
+<g class="pt"><title>all 20 classes, threshold 0.50: recall 0.453</title><circle cx="680.0" cy="216.0" r="5" fill="#f37021" stroke="#ffffff" stroke-width="2"/></g>
+<text x="535.0" y="183.7" text-anchor="end" fill="#111317">0.564</text>
+</svg></div>
+            <div class="viz-legend"><span><i style="background:#2a78d6"></i>precision</span><span><i style="background:#f37021"></i>recall</span></div>
+            <figcaption>I measured precision and recall for model 2 against the objectness threshold on the full dataset at NMS 0.5, with person in the left panel and all 20 classes in the right, and I wrote the selection rule down before I read the numbers. Deploy at the highest threshold that keeps person recall within 0.02 of its value at 0.05. That is 0.25. There the planner gets 3.5 boxes per frame instead of 8.6 and almost none of them arrive without a class label.</figcaption>
+            <details>
+              <summary>Show the numbers</summary>
+              <div class="tbl"><table><thead><tr><th>threshold</th><th>person P</th><th>person R</th><th>all P</th><th>all R</th><th>boxes per image</th></tr></thead><tbody><tr><td>0.05</td><td>0.637</td><td>0.638</td><td>0.591</td><td>0.586</td><td>8.58</td></tr><tr><td>0.10</td><td>0.637</td><td>0.638</td><td>0.591</td><td>0.586</td><td>5.78</td></tr><tr><td>0.25</td><td>0.673</td><td>0.620</td><td>0.634</td><td>0.564</td><td>3.46</td></tr><tr><td>0.50</td><td>0.808</td><td>0.489</td><td>0.786</td><td>0.453</td><td>2.22</td></tr></tbody></table></div>
+            </details>
+          </figure>
         </div></li>
         <li><div>
           <h3>Sampling strategy</h3>
@@ -112,7 +279,7 @@
           <h3>NMS threshold</h3>
           <p>A sweep from 0.1 to 0.9 found a flat top between 0.4 and 0.6 that held on the 4,525 images outside the sample and at the score thresholds the service would run, so I kept 0.5 in the middle of the plateau.</p>
           <figure class="case-figure">
-            <svg viewBox="0 0 700 312" role="img" aria-labelledby="nmsTitle nmsDesc">
+            <div class="viz"><svg viewBox="0 0 700 312" role="img" aria-labelledby="nmsTitle nmsDesc">
               <title id="nmsTitle">mAP against the NMS IoU threshold</title>
               <desc id="nmsDesc">Line chart. mAP rises from 0.545 at an NMS threshold of 0.1 to a flat top of 0.572 at 0.5 and 0.571 at 0.6, then falls to 0.468 at 0.9.</desc>
               <rect x="290" y="20" width="156" height="250" fill="rgba(243,112,33,0.08)"/>
@@ -141,28 +308,149 @@
                 <text x="368" y="56" text-anchor="middle">0.572</text>
                 <text x="668" y="232" text-anchor="end">0.468</text>
               </g>
-            </svg>
+            </svg></div>
             <figcaption>mAP at a 0.5 match IoU against the NMS threshold, model 2, on the 5,000-image sample with a 0.05 score threshold.</figcaption>
             <details>
               <summary>Show the numbers</summary>
-              <table>
+              <div class="tbl"><table>
                 <thead><tr><th>NMS IoU</th><th>mAP</th></tr></thead>
                 <tbody>
                   <tr><td>0.1</td><td>0.545</td></tr><tr><td>0.2</td><td>0.548</td></tr><tr><td>0.3</td><td>0.564</td></tr>
                   <tr><td>0.4</td><td>0.567</td></tr><tr><td>0.5</td><td>0.572</td></tr><tr><td>0.6</td><td>0.571</td></tr>
                   <tr><td>0.7</td><td>0.559</td></tr><tr><td>0.8</td><td>0.527</td></tr><tr><td>0.9</td><td>0.468</td></tr>
                 </tbody>
-              </table>
+              </table></div>
             </details>
           </figure>
         </div></li>
         <li><div>
           <h3>Augmentation tests</h3>
           <p>Heavy blur cost 0.17 mAP and darkening cost 0.11, while a horizontal flip changed nothing and a vertical flip cost 0.25 (an upside-down aisle is a view the robot never sees, so vertical flips stay out of retraining). Boxes per frame fell 26 to 55 percent under blur and darkness, which makes the box count a cheap online signal that the camera or the lighting has changed.</p>
+
+          <figure class="case-figure">
+            <div class="viz"><svg viewBox="0 0 700 476" role="img" aria-labelledby="augTitle augDesc">
+<title id="augTitle">mAP under each image transform</title>
+<desc id="augDesc">Bar chart grouped by transform family with the untouched baseline of 0.572 marked. Blur and darkening cost the most, contrast changes almost nothing, the horizontal flip is level with the baseline and the vertical flip falls to 0.318.</desc>
+<line x1="130.0" y1="16" x2="130.0" y2="440" stroke="rgba(17,19,23,0.09)"/>
+<text x="130.0" y="456" text-anchor="middle">0.0</text>
+<line x1="306.7" y1="16" x2="306.7" y2="440" stroke="rgba(17,19,23,0.09)"/>
+<text x="306.7" y="456" text-anchor="middle">0.2</text>
+<line x1="483.3" y1="16" x2="483.3" y2="440" stroke="rgba(17,19,23,0.09)"/>
+<text x="483.3" y="456" text-anchor="middle">0.4</text>
+<line x1="660.0" y1="16" x2="660.0" y2="440" stroke="rgba(17,19,23,0.09)"/>
+<text x="660.0" y="456" text-anchor="middle">0.6</text>
+<text x="395" y="472" text-anchor="middle">mAP at match IoU 0.5, NMS 0.5</text>
+<text x="120" y="36" text-anchor="end" fill="#111317" font-weight="700">blur</text>
+<text x="120" y="56.0" text-anchor="end">baseline</text>
+<g class="pt"><title>blur none: mAP 0.572</title><rect x="130" y="45" width="505.3" height="14" rx="3" fill="rgba(17,19,23,0.18)"/><text x="643.3" y="56.0" fill="#111317">0.572</text></g>
+<text x="120" y="76.0" text-anchor="end">k=5</text>
+<g class="pt"><title>blur k=5: mAP 0.541</title><rect x="130" y="65" width="477.9" height="14" rx="3" fill="#f37021"/><text x="615.9" y="76.0" fill="#111317">0.541</text></g>
+<text x="120" y="96.0" text-anchor="end">k=9</text>
+<g class="pt"><title>blur k=9: mAP 0.468</title><rect x="130" y="85" width="413.4" height="14" rx="3" fill="#f37021"/><text x="551.4" y="96.0" fill="#111317">0.468</text></g>
+<text x="120" y="116.0" text-anchor="end">k=15</text>
+<g class="pt"><title>blur k=15: mAP 0.402</title><rect x="130" y="105" width="355.1" height="14" rx="3" fill="#f37021"/><text x="493.1" y="116.0" fill="#111317">0.402</text></g>
+<text x="120" y="146" text-anchor="end" fill="#111317" font-weight="700">brightness</text>
+<text x="120" y="166.0" text-anchor="end">-80</text>
+<g class="pt"><title>brightness -80: mAP 0.459</title><rect x="130" y="155" width="405.5" height="14" rx="3" fill="#f37021"/><text x="543.5" y="166.0" fill="#111317">0.459</text></g>
+<text x="120" y="186.0" text-anchor="end">-40</text>
+<g class="pt"><title>brightness -40: mAP 0.554</title><rect x="130" y="175" width="489.4" height="14" rx="3" fill="#f37021"/><text x="627.4" y="186.0" fill="#111317">0.554</text></g>
+<text x="120" y="206.0" text-anchor="end">baseline</text>
+<g class="pt"><title>brightness none: mAP 0.572</title><rect x="130" y="195" width="505.3" height="14" rx="3" fill="rgba(17,19,23,0.18)"/><text x="643.3" y="206.0" fill="#111317">0.572</text></g>
+<text x="120" y="226.0" text-anchor="end">+40</text>
+<g class="pt"><title>brightness +40: mAP 0.556</title><rect x="130" y="215" width="491.1" height="14" rx="3" fill="#f37021"/><text x="629.1" y="226.0" fill="#111317">0.556</text></g>
+<text x="120" y="246.0" text-anchor="end">+80</text>
+<g class="pt"><title>brightness +80: mAP 0.534</title><rect x="130" y="235" width="471.7" height="14" rx="3" fill="#f37021"/><text x="609.7" y="246.0" fill="#111317">0.534</text></g>
+<text x="120" y="276" text-anchor="end" fill="#111317" font-weight="700">contrast</text>
+<text x="120" y="296.0" text-anchor="end">x0.6</text>
+<g class="pt"><title>contrast x0.6: mAP 0.569</title><rect x="130" y="285" width="502.6" height="14" rx="3" fill="#f37021"/><text x="640.6" y="296.0" fill="#111317">0.569</text></g>
+<text x="120" y="316.0" text-anchor="end">baseline</text>
+<g class="pt"><title>contrast none: mAP 0.572</title><rect x="130" y="305" width="505.3" height="14" rx="3" fill="rgba(17,19,23,0.18)"/><text x="643.3" y="316.0" fill="#111317">0.572</text></g>
+<text x="120" y="336.0" text-anchor="end">x1.4</text>
+<g class="pt"><title>contrast x1.4: mAP 0.562</title><rect x="130" y="325" width="496.4" height="14" rx="3" fill="#f37021"/><text x="634.4" y="336.0" fill="#111317">0.562</text></g>
+<text x="120" y="366" text-anchor="end" fill="#111317" font-weight="700">flip</text>
+<text x="120" y="386.0" text-anchor="end">baseline</text>
+<g class="pt"><title>flip none: mAP 0.572</title><rect x="130" y="375" width="505.3" height="14" rx="3" fill="rgba(17,19,23,0.18)"/><text x="643.3" y="386.0" fill="#111317">0.572</text></g>
+<text x="120" y="406.0" text-anchor="end">horizontal</text>
+<g class="pt"><title>flip horizontal: mAP 0.581</title><rect x="130" y="395" width="513.2" height="14" rx="3" fill="#f37021"/><text x="651.2" y="406.0" fill="#111317">0.581</text></g>
+<text x="120" y="426.0" text-anchor="end">vertical</text>
+<g class="pt"><title>flip vertical: mAP 0.318</title><rect x="130" y="415" width="280.9" height="14" rx="3" fill="#f37021"/><text x="418.9" y="426.0" fill="#111317">0.318</text></g>
+<line x1="635.3" y1="16" x2="635.3" y2="440" stroke="#111317" stroke-width="1.5"/>
+<text x="635.3" y="12" text-anchor="middle" fill="#111317">baseline 0.572</text>
+</svg></div>
+            
+            <figcaption>I ran model 2 over the 5,000-image sample after each transform and grouped the results by family against the untouched sample at 0.572, so each bar is the same images under one change to the pixels. Blur degrades in step with the kernel size. It costs 0.03 at k=5 and 0.17 at k=15, darkening by 80 costs 0.11 where brightening by 80 costs 0.04, contrast moves under 0.01, and the horizontal flip sits on the baseline at 0.581. The vertical flip is the largest drop in the set at 0.318 and that is why I keep it out of the retraining augmentations.</figcaption>
+            <details>
+              <summary>Show the numbers</summary>
+              <div class="tbl"><table><thead><tr><th>variant</th><th>mAP</th><th>detections at score 0.5</th><th>change</th></tr></thead><tbody><tr><td>original</td><td>0.572</td><td>12,504</td><td>0.000</td></tr><tr><td>blur k=5</td><td>0.541</td><td>9,236</td><td>-0.031</td></tr><tr><td>blur k=9</td><td>0.468</td><td>7,178</td><td>-0.104</td></tr><tr><td>blur k=15</td><td>0.402</td><td>5,585</td><td>-0.170</td></tr><tr><td>horizontal flip</td><td>0.581</td><td>12,448</td><td>+0.009</td></tr><tr><td>vertical flip</td><td>0.318</td><td>6,444</td><td>-0.254</td></tr><tr><td>brightness -80</td><td>0.459</td><td>8,075</td><td>-0.113</td></tr><tr><td>brightness -40</td><td>0.554</td><td>11,380</td><td>-0.018</td></tr><tr><td>brightness +40</td><td>0.556</td><td>11,924</td><td>-0.016</td></tr><tr><td>brightness +80</td><td>0.534</td><td>10,790</td><td>-0.038</td></tr><tr><td>contrast x0.6</td><td>0.569</td><td>12,276</td><td>-0.003</td></tr><tr><td>contrast x1.4</td><td>0.562</td><td>12,090</td><td>-0.010</td></tr></tbody></table></div>
+            </details>
+          </figure>
         </div></li>
         <li><div>
           <h3>Hard negative mining weights</h3>
           <p>I scored all 5,000 images under seven sets of loss weights and compared the 500 hardest images each one selects, then repeated the ranking with the loss divided by the number of objects in the image.</p>
+
+          <figure class="case-figure">
+            <div class="viz"><svg viewBox="0 0 700 240" role="img" aria-labelledby="hnmTitle hnmDesc">
+<title id="hnmTitle">What the hardest 500 images look like under each loss weighting</title>
+<desc id="hnmDesc">Two panels across six lambda settings. Ranked by raw loss the hardest 500 images average about 20 boxes each and wood pallet is a third of the boxes; ranked by loss per object they average 1.2 boxes and fire is the top class at 15 percent. The whole sample averages 4.1 boxes per image.</desc>
+<text x="150" y="20" fill="#111317">boxes per image</text>
+<text x="440" y="20" fill="#111317">top class, share of boxes</text>
+<line x1="150.0" y1="38" x2="150.0" y2="210" stroke="rgba(17,19,23,0.09)"/>
+<text x="150.0" y="226" text-anchor="middle">0</text>
+<line x1="270.0" y1="38" x2="270.0" y2="210" stroke="rgba(17,19,23,0.09)"/>
+<text x="270.0" y="226" text-anchor="middle">10</text>
+<line x1="390.0" y1="38" x2="390.0" y2="210" stroke="rgba(17,19,23,0.09)"/>
+<text x="390.0" y="226" text-anchor="middle">20</text>
+<line x1="440.0" y1="38" x2="440.0" y2="210" stroke="rgba(17,19,23,0.09)"/>
+<text x="440.0" y="226" text-anchor="middle">0.00</text>
+<line x1="540.0" y1="38" x2="540.0" y2="210" stroke="rgba(17,19,23,0.09)"/>
+<text x="540.0" y="226" text-anchor="middle">0.25</text>
+<line x1="640.0" y1="38" x2="640.0" y2="210" stroke="rgba(17,19,23,0.09)"/>
+<text x="640.0" y="226" text-anchor="middle">0.50</text>
+<line x1="199.2" y1="38" x2="199.2" y2="210" stroke="#111317" stroke-width="1.5"/>
+<text x="204.2" y="34" fill="#111317">whole sample 4.1</text>
+<text x="140" y="61.0" text-anchor="end" fill="#111317">balanced</text>
+<g class="pt"><title>balanced, raw loss: 19.7 boxes</title><rect x="150" y="46" width="236.4" height="10" rx="2" fill="#f37021"/></g>
+<g class="pt"><title>balanced, loss per object: 1.22 boxes</title><rect x="150" y="58" width="14.6" height="10" rx="2" fill="#2a78d6"/></g>
+<g class="pt"><title>balanced, raw loss: 0.33 share (wood pallet)</title><rect x="440" y="46" width="132.0" height="10" rx="2" fill="#f37021"/></g>
+<g class="pt"><title>balanced, loss per object: 0.15 share (fire)</title><rect x="440" y="58" width="60.0" height="10" rx="2" fill="#2a78d6"/></g>
+<text x="140" y="87.0" text-anchor="end" fill="#111317">localization x5</text>
+<g class="pt"><title>localization x5, raw loss: 19.7 boxes</title><rect x="150" y="72" width="236.4" height="10" rx="2" fill="#f37021"/></g>
+<g class="pt"><title>localization x5, loss per object: 1.23 boxes</title><rect x="150" y="84" width="14.8" height="10" rx="2" fill="#2a78d6"/></g>
+<g class="pt"><title>localization x5, raw loss: 0.33 share (wood pallet)</title><rect x="440" y="72" width="132.0" height="10" rx="2" fill="#f37021"/></g>
+<g class="pt"><title>localization x5, loss per object: 0.15 share (fire)</title><rect x="440" y="84" width="60.0" height="10" rx="2" fill="#2a78d6"/></g>
+<text x="140" y="113.0" text-anchor="end" fill="#111317">classification x5</text>
+<g class="pt"><title>classification x5, raw loss: 19.7 boxes</title><rect x="150" y="98" width="236.4" height="10" rx="2" fill="#f37021"/></g>
+<g class="pt"><title>classification x5, loss per object: 1.22 boxes</title><rect x="150" y="110" width="14.6" height="10" rx="2" fill="#2a78d6"/></g>
+<g class="pt"><title>classification x5, raw loss: 0.32 share (wood pallet)</title><rect x="440" y="98" width="128.0" height="10" rx="2" fill="#f37021"/></g>
+<g class="pt"><title>classification x5, loss per object: 0.15 share (fire)</title><rect x="440" y="110" width="60.0" height="10" rx="2" fill="#2a78d6"/></g>
+<text x="140" y="139.0" text-anchor="end" fill="#111317">no-object x5</text>
+<g class="pt"><title>no-object x5, raw loss: 19.7 boxes</title><rect x="150" y="124" width="236.4" height="10" rx="2" fill="#f37021"/></g>
+<g class="pt"><title>no-object x5, loss per object: 1.23 boxes</title><rect x="150" y="136" width="14.8" height="10" rx="2" fill="#2a78d6"/></g>
+<g class="pt"><title>no-object x5, raw loss: 0.34 share (wood pallet)</title><rect x="440" y="124" width="136.0" height="10" rx="2" fill="#f37021"/></g>
+<g class="pt"><title>no-object x5, loss per object: 0.14 share (fire)</title><rect x="440" y="136" width="56.0" height="10" rx="2" fill="#2a78d6"/></g>
+<text x="140" y="165.0" text-anchor="end" fill="#111317">no-object x0.1</text>
+<g class="pt"><title>no-object x0.1, raw loss: 19.6 boxes</title><rect x="150" y="150" width="235.2" height="10" rx="2" fill="#f37021"/></g>
+<g class="pt"><title>no-object x0.1, loss per object: 1.22 boxes</title><rect x="150" y="162" width="14.6" height="10" rx="2" fill="#2a78d6"/></g>
+<g class="pt"><title>no-object x0.1, raw loss: 0.32 share (wood pallet)</title><rect x="440" y="150" width="128.0" height="10" rx="2" fill="#f37021"/></g>
+<g class="pt"><title>no-object x0.1, loss per object: 0.15 share (fire)</title><rect x="440" y="162" width="60.0" height="10" rx="2" fill="#2a78d6"/></g>
+<text x="140" y="191.0" text-anchor="end" fill="#111317">objectness x5</text>
+<g class="pt"><title>objectness x5, raw loss: 19.7 boxes</title><rect x="150" y="176" width="236.4" height="10" rx="2" fill="#f37021"/></g>
+<g class="pt"><title>objectness x5, loss per object: 1.23 boxes</title><rect x="150" y="188" width="14.8" height="10" rx="2" fill="#2a78d6"/></g>
+<g class="pt"><title>objectness x5, raw loss: 0.32 share (wood pallet)</title><rect x="440" y="176" width="128.0" height="10" rx="2" fill="#f37021"/></g>
+<g class="pt"><title>objectness x5, loss per object: 0.15 share (fire)</title><rect x="440" y="188" width="60.0" height="10" rx="2" fill="#2a78d6"/></g>
+<text x="392.4" y="55" fill="#111317">19.7</text>
+<text x="170.6" y="67" fill="#111317">1.2</text>
+<text x="578.0" y="55" fill="#111317">wood pallet 0.33</text>
+<text x="506.0" y="67" fill="#111317">fire 0.15</text>
+</svg></div>
+            <div class="viz-legend"><span><i style="background:#f37021"></i>raw loss</span><span><i style="background:#2a78d6"></i>loss per object</span></div>
+            <figcaption>I ranked the sample twice under each of the six loss weightings and looked at the hardest 500 images from each ranking, once by the raw summed loss and once by that loss divided by the number of labeled objects in the image. The raw ranking selects crowds. Every setting I tried returns frames with about 20 boxes each and a third of those boxes are wood pallets, against 4.1 boxes for an average image, and the lambdas only reshuffle 1 to 10 percent of that set. When I divide by the object count I get frames with 1.2 boxes led by fire and the other low-AP classes, and that set shares 25 images with the raw one.</figcaption>
+            <details>
+              <summary>Show the numbers</summary>
+              <div class="tbl"><table><thead><tr><th>setting</th><th>boxes per image (raw)</th><th>small boxes (raw)</th><th>top class (raw)</th><th>boxes per image (per object)</th><th>small boxes (per object)</th><th>top class (per object)</th><th>shared with raw top 500</th></tr></thead><tbody><tr><td>balanced</td><td>19.7</td><td>0.15</td><td>wood pallet (0.33)</td><td>1.22</td><td>0.00</td><td>fire (0.15)</td><td>0.05</td></tr><tr><td>localization x5</td><td>19.7</td><td>0.15</td><td>wood pallet (0.33)</td><td>1.23</td><td>0.00</td><td>fire (0.15)</td><td>0.06</td></tr><tr><td>classification x5</td><td>19.7</td><td>0.14</td><td>wood pallet (0.32)</td><td>1.22</td><td>0.00</td><td>fire (0.15)</td><td>0.05</td></tr><tr><td>no-object x5</td><td>19.7</td><td>0.16</td><td>wood pallet (0.34)</td><td>1.23</td><td>0.01</td><td>fire (0.14)</td><td>0.05</td></tr><tr><td>no-object x0.1</td><td>19.6</td><td>0.15</td><td>wood pallet (0.32)</td><td>1.22</td><td>0.00</td><td>fire (0.15)</td><td>0.05</td></tr><tr><td>objectness x5</td><td>19.7</td><td>0.15</td><td>wood pallet (0.32)</td><td>1.23</td><td>0.00</td><td>fire (0.15)</td><td>0.05</td></tr><tr><td>whole sample</td><td>4.1</td><td>0.06</td><td>person (0.20)</td><td></td><td></td><td></td><td></td></tr></tbody></table></div>
+            </details>
+          </figure>
         </div></li>
       </ol>
     </div>

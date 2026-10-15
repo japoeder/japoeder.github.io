@@ -316,13 +316,22 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; font-weight: 700; lette
 .case-steps h3 { font-size: 1.12rem; font-weight: 600; letter-spacing: -0.025em; margin-bottom: 0.5rem; }
 .case-steps p { color: var(--ink-soft); margin: 0; max-width: 70ch; }
 .case-figure { margin: 1.4rem 0 0; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: clamp(1rem, 2.4vw, 1.6rem); max-width: 760px; }
+.case-steps > li > div { min-width: 0; }
+.case-figure .viz { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .case-figure svg { width: 100%; height: auto; display: block; }
+@media (max-width: 600px) { .case-figure .viz svg { min-width: 540px; } }
 .case-figure svg .pt { cursor: default; }
 .case-figure svg .pt:hover circle { r: 7; }
 .case-figure figcaption { font-size: 0.86rem; color: var(--muted); margin-top: 0.8rem; }
 .case-figure details { margin-top: 0.7rem; font-size: 0.86rem; color: var(--muted); }
 .case-figure summary { cursor: pointer; font-family: var(--mono); font-size: 0.64rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); }
-.case-figure table { border-collapse: collapse; margin-top: 0.6rem; font-variant-numeric: tabular-nums; }
+.case-figure svg text { font-family: var(--mono); font-size: 12px; fill: var(--muted); }
+.case-figure .viz-legend { display: flex; flex-wrap: wrap; gap: 0.4rem 1.2rem; margin-top: 0.6rem; font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.04em; color: var(--ink-soft); }
+.case-figure .viz-legend span { display: inline-flex; align-items: center; gap: 0.45rem; }
+.case-figure .viz-legend i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.case-figure .tbl { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.case-figure table { border-collapse: collapse; margin-top: 0.6rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.case-figure th:first-child, .case-figure td:first-child { text-align: left; }
 .case-figure th, .case-figure td { padding: 0.3rem 1rem 0.3rem 0; text-align: right; border-bottom: 1px solid var(--line); }
 .case-findings { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1.2rem, 2.5vw, 2rem); margin-top: clamp(1.6rem, 3vw, 2.4rem); }
 .case-findings > div { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: clamp(1.3rem, 2.4vw, 1.9rem); }
