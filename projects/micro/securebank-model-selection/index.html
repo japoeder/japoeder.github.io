@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Archivo+Expanded:wght@600;700;800&family=Hanken+Grotesk:wght@400;500;600;700;800&family=Inter+Tight:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/all.min.css">
-  <link rel="stylesheet" href="/assets/css/fabric.css?v=12">
+  <link rel="stylesheet" href="/assets/css/fabric.css?v=13">
 </head>
 <body>
 
@@ -53,7 +53,7 @@
         <div><div class="k">Course</div><div class="v">EN.705.603 Creating AI-Enabled Systems, Johns Hopkins, fall 2026</div></div>
         <div><div class="k">Domain</div><div class="v">Card fraud detection, class imbalance, time-split validation</div></div>
         <div><div class="k">Stack</div><div class="v">Python, scikit-learn, optbinning, pandas</div></div>
-        <div><div class="k">Result</div><div class="v">Gradient boosting at AP 0.80, 54 percent precision and 82 percent recall on December</div></div>
+        <div><div class="k">Result</div><div class="v">Gradient boosting at AP 0.83, 57 percent precision and 84 percent recall on December</div></div>
       </div>
     </div>
   </section>
@@ -64,8 +64,8 @@
         <div class="l"><span class="idx">01</span><h2>The two metrics</h2></div>
       </div>
       <div class="case-prose reveal">
-        <p>The SecureBank case in EN.705.603 at Johns Hopkins asks for a card-fraud model that reaches 70 percent precision and 70 percent recall on unseen months. I ran this as the model selection pass. I picked two offline metrics tied to the requirements, trained three models on the same chronological split, and read the comparison for where the signal lives.</p>
-        <p>I score every model on average precision over the whole ranking and on precision and recall at one operating point. Average precision is my model selection number, since it does not depend on a threshold I have not chosen yet. The operating point is the number I'd show the bank. The alert threshold is set on the validation month at the lowest score that keeps precision at 70 percent, which is the analyst capacity constraint from my earlier posts turned into a rule, and recall at that point is what the bank gets for it.</p>
+        <p>The SecureBank case in EN.705.603 at Johns Hopkins asks for a card-fraud model that reaches 70 percent precision and 70 percent recall on unseen months. I ran this as the model selection pass. I picked two offline metrics tied to the requirements, trained three models on the same chronological split, and read the comparison for where the signal lives. Codex reviewed the first version adversarially and I reworked the leakage paths, the ablations, and the claims it flagged.</p>
+        <p>I score every model on average precision over the whole ranking and on precision and recall at one operating point. Average precision is my model selection number, since it does not depend on a threshold I have not chosen yet. The operating point is the number I'd show the bank. The alert threshold is set on the validation month at the lowest score that keeps precision at 70 percent, which is the analyst capacity constraint from my earlier posts turned into a rule. A model that never reaches 70 percent on November gets no qualifying operating point; I score it at a fixed 10 alerts a day instead and say so.</p>
       </div>
 
     </div>
@@ -77,13 +77,9 @@
         <div class="l"><span class="idx">02</span><h2>Dataset design</h2></div>
       </div>
       <div class="case-prose reveal">
-        <p>The split is the one I argued for in the dataset design week. I train on January 2019 through October 2020, choose the threshold on November, and score December once. I keep every fraud row in training and a 10 percent sample of legitimate rows with balanced class weights; validation and test stay at the natural fraud rate, because precision on a rebalanced set is a number the bank never sees.</p>
+        <p>The split is the one I argued for in the dataset design week. I train on January 2019 through October 2020, choose the threshold on November, and score December once. The models train on the full training frame with balanced class weights; I kept the 10 percent downsample from my first pass as an ablation and it costs the boosted model 0.03 of average precision. Validation and test stay at the fraud rate among labelled rows, because precision on a rebalanced set is a number the bank never sees. The 10 percent of transactions with no label are out of every metric; their median amount and night share match the labelled rows, which is the only check I have that they are missing at random.</p>
       </div>
-      <div class="case-table reveal"><table><thead><tr><th>Partition</th><th>Rows</th><th>Fraud</th><th>Fraud rate</th></tr></thead><tbody>
-<tr><td>Train (Jan 2019 to Oct 2020)</td><td>1,313,360</td><td>6,099</td><td>0.46%</td></tr>
-<tr><td>Validation (Nov 2020)</td><td>57,919</td><td>202</td><td>0.35%</td></tr>
-<tr><td>Test (Dec 2020)</td><td>111,593</td><td>195</td><td>0.17%</td></tr>
-</tbody></table></div>
+      <div class="case-table reveal"><table><thead><tr><th>Partition</th><th>Rows</th><th>Fraud</th><th>Fraud rate</th></tr></thead><tbody><tr><td>Train (Jan 2019 to Oct 2020)</td><td>1,313,360</td><td>6,099</td><td>0.46%</td></tr><tr><td>Validation (Nov 2020)</td><td>57,919</td><td>202</td><td>0.35%</td></tr><tr><td>Test (Dec 2020)</td><td>111,593</td><td>195</td><td>0.17%</td></tr></tbody></table></div>
       <div class="case-prose reveal">
         <p>December doubles the volume and keeps the fraud count flat, so the base rate halves. Every precision number I report below was harder to earn than the validation month suggested.</p>
       </div>
@@ -97,14 +93,15 @@
         <div class="l"><span class="idx">03</span><h2>Features</h2></div>
       </div>
       <div class="case-prose reveal">
-        <p>I built seventeen features, all computable at authorization. log amount and amount against the card's own prior mean, counts of the card's transactions in the prior hour and prior day, log seconds since the previous transaction, hour and weekday and month as sine and cosine pairs plus a night flag, cardholder age, log city population, distance from home to merchant, and the merchant category. The velocity features use every transaction, including the 10 percent with no label, but only rows before the one being scored.</p>
+        <p>I built seventeen features, all computable at authorization. The amount bands and the gap sentinel were fixed before any fitting. The velocity features use every transaction, including the unlabelled ones, but only rows with a strictly earlier timestamp. The scorecard adds one cross bin, category by amount band.</p>
+        <p class="case-note">Numeric: <code>log_amt</code>, <code>amt_vs_prior_mean</code>, <code>n_prev_1h</code>, <code>n_prev_24h</code>, <code>log_secs_since_prev</code>, <code>first_txn</code>, <code>hour_sin</code>, <code>hour_cos</code>, <code>night</code>, <code>dow_sin</code>, <code>dow_cos</code>, <code>month_sin</code>, <code>month_cos</code>, <code>age</code>, <code>log_city_pop</code>, <code>home_merchant_km</code>. Categorical: <code>category</code>, and <code>cat_amt</code> (category by amount band) in the scorecard.</p>
       </div>
       <figure class="case-figure reveal">
         <div class="viz"><svg viewBox="0 0 700 320" role="img" aria-labelledby="amtTitle amtDesc">
 <title id="amtTitle">Fraud rate by transaction amount band, log scale</title>
-<desc id="amtDesc">Column chart on a log scale. Everything under $200 sits near or below 0.6 percent; the rate climbs through $200 to $800 and peaks at 44.7 percent in the $800 to $1,200 band, then falls to 1.5 percent above $1,200.</desc>
-<rect x="377.0" y="20" width="240.0" height="230" fill="rgba(243,112,33,0.08)"/>
-<text x="497.0" y="14" text-anchor="middle" fill="#111317">$200 to $1,200: where the fraud is</text>
+<desc id="amtDesc">Column chart on a log scale. Everything under $200 sits near or below 0.2 percent; the rate climbs through $200 to $800 and peaks at 45.5 percent in the $800 to $1,200 band, then falls to 1.7 percent above $1,200.</desc>
+<rect x="246.3" y="20" width="344.6" height="230" fill="rgba(243,112,33,0.08)"/>
+<text x="418.6" y="14" text-anchor="middle" fill="#111317">$200 to $1,200: where the fraud is</text>
 <line x1="70" y1="234.7" x2="680" y2="234.7" stroke="rgba(17,19,23,0.09)"/>
 <text x="62" y="238.7" text-anchor="end">0.01%</text>
 <line x1="70" y1="183.5" x2="680" y2="183.5" stroke="rgba(17,19,23,0.09)"/>
@@ -115,33 +112,27 @@
 <text x="62" y="85.2" text-anchor="end">10%</text>
 <line x1="70" y1="30.0" x2="680" y2="30.0" stroke="rgba(17,19,23,0.09)"/>
 <text x="62" y="34.0" text-anchor="end">100%</text>
-<g class="pt"><title>$0 to $10: 0.119% fraud, 460 of 386,899 rows</title><rect x="76.0" y="179.6" width="49.0" height="70.4" rx="3" fill="#f37021"/><text x="100.5" y="173.6" text-anchor="middle" fill="#111317" font-size="11">0.12%</text></g>
-<text x="100.5" y="268" text-anchor="middle" font-size="11"><$10</text>
-<g class="pt"><title>$10 to $20: 0.632% fraud, 646 of 102,224 rows</title><rect x="137.0" y="142.5" width="49.0" height="107.5" rx="3" fill="#f37021"/><text x="161.5" y="136.5" text-anchor="middle" fill="#111317" font-size="11">0.63%</text></g>
-<text x="161.5" y="268" text-anchor="middle" font-size="11">$10</text>
-<g class="pt"><title>$20 to $50: 0.125% fraud, 357 of 285,473 rows</title><rect x="198.0" y="178.5" width="49.0" height="71.5" rx="3" fill="#f37021"/><text x="222.5" y="172.5" text-anchor="middle" fill="#111317" font-size="11">0.12%</text></g>
-<text x="222.5" y="268" text-anchor="middle" font-size="11">$20</text>
-<g class="pt"><title>$50 to $100: 0.009% fraud, 40 of 440,462 rows</title><rect x="259.0" y="237.0" width="49.0" height="13.0" rx="3" fill="#f37021"/><text x="283.5" y="231.0" text-anchor="middle" fill="#111317" font-size="11">0.01%</text></g>
-<text x="283.5" y="268" text-anchor="middle" font-size="11">$50</text>
-<g class="pt"><title>$100 to $200: 0.081% fraud, 160 of 197,718 rows</title><rect x="320.0" y="188.2" width="49.0" height="61.8" rx="3" fill="#f37021"/><text x="344.5" y="182.2" text-anchor="middle" fill="#111317" font-size="11">0.08%</text></g>
-<text x="344.5" y="268" text-anchor="middle" font-size="11">$100</text>
-<g class="pt"><title>$200 to $300: 1.738% fraud, 641 of 36,873 rows</title><rect x="381.0" y="120.0" width="49.0" height="130.0" rx="3" fill="#f37021"/><text x="405.5" y="114.0" text-anchor="middle" fill="#111317" font-size="11">1.74%</text></g>
-<text x="405.5" y="268" text-anchor="middle" font-size="11">$200</text>
-<g class="pt"><title>$300 to $500: 6.894% fraud, 1,136 of 16,479 rows</title><rect x="442.0" y="89.4" width="49.0" height="160.6" rx="3" fill="#f37021"/><text x="466.5" y="83.4" text-anchor="middle" fill="#111317" font-size="11">6.89%</text></g>
-<text x="466.5" y="268" text-anchor="middle" font-size="11">$300</text>
-<g class="pt"><title>$500 to $800: 8.725% fraud, 805 of 9,226 rows</title><rect x="503.0" y="84.2" width="49.0" height="165.8" rx="3" fill="#f37021"/><text x="527.5" y="78.2" text-anchor="middle" fill="#111317" font-size="11">8.72%</text></g>
-<text x="527.5" y="268" text-anchor="middle" font-size="11">$500</text>
-<g class="pt"><title>$800 to $1200: 44.662% fraud, 2,213 of 4,955 rows</title><rect x="564.0" y="47.9" width="49.0" height="202.1" rx="3" fill="#f37021"/><text x="588.5" y="41.9" text-anchor="middle" fill="#111317" font-size="11">44.66%</text></g>
-<text x="588.5" y="268" text-anchor="middle" font-size="11">$800</text>
-<g class="pt"><title>$1200 to $30000: 1.483% fraud, 38 of 2,563 rows</title><rect x="625.0" y="123.6" width="49.0" height="126.4" rx="3" fill="#f37021"/><text x="649.5" y="117.6" text-anchor="middle" fill="#111317" font-size="11">1.48%</text></g>
-<text x="649.5" y="268" text-anchor="middle" font-size="11">$1,200+</text>
-<text x="375" y="292" text-anchor="middle">transaction amount band, lower edge; fraud rate on all labelled rows</text>
+<g class="pt"><title>$0 to $50: 0.201% fraud, 1,379 of 685,955 rows</title><rect x="76.0" y="168.0" width="75.1" height="82.0" rx="3" fill="#f37021"/><text x="113.6" y="162.0" text-anchor="middle" fill="#111317" font-size="11">0.20%</text></g>
+<text x="113.6" y="268" text-anchor="middle" font-size="11">$0</text>
+<g class="pt"><title>$50 to $200: 0.034% fraud, 190 of 565,058 rows</title><rect x="163.1" y="207.5" width="75.1" height="42.5" rx="3" fill="#f37021"/><text x="200.7" y="201.5" text-anchor="middle" fill="#111317" font-size="11">0.03%</text></g>
+<text x="200.7" y="268" text-anchor="middle" font-size="11">$50</text>
+<g class="pt"><title>$200 to $300: 1.827% fraud, 598 of 32,723 rows</title><rect x="250.3" y="118.9" width="75.1" height="131.1" rx="3" fill="#f37021"/><text x="287.9" y="112.9" text-anchor="middle" fill="#111317" font-size="11">1.83%</text></g>
+<text x="287.9" y="268" text-anchor="middle" font-size="11">$200</text>
+<g class="pt"><title>$300 to $500: 7.294% fraud, 1,065 of 14,601 rows</title><rect x="337.4" y="88.2" width="75.1" height="161.8" rx="3" fill="#f37021"/><text x="375.0" y="82.2" text-anchor="middle" fill="#111317" font-size="11">7.29%</text></g>
+<text x="375.0" y="268" text-anchor="middle" font-size="11">$300</text>
+<g class="pt"><title>$500 to $800: 9.262% fraud, 762 of 8,227 rows</title><rect x="424.6" y="82.9" width="75.1" height="167.1" rx="3" fill="#f37021"/><text x="462.1" y="76.9" text-anchor="middle" fill="#111317" font-size="11">9.26%</text></g>
+<text x="462.1" y="268" text-anchor="middle" font-size="11">$500</text>
+<g class="pt"><title>$800 to $1200: 45.549% fraud, 2,067 of 4,538 rows</title><rect x="511.7" y="47.5" width="75.1" height="202.5" rx="3" fill="#f37021"/><text x="549.3" y="41.5" text-anchor="middle" fill="#111317" font-size="11">45.55%</text></g>
+<text x="549.3" y="268" text-anchor="middle" font-size="11">$800</text>
+<g class="pt"><title>$1200 to $up: 1.683% fraud, 38 of 2,258 rows</title><rect x="598.9" y="120.8" width="75.1" height="129.2" rx="3" fill="#f37021"/><text x="636.4" y="114.8" text-anchor="middle" fill="#111317" font-size="11">1.68%</text></g>
+<text x="636.4" y="268" text-anchor="middle" font-size="11">$1,200+</text>
+<text x="375" y="292" text-anchor="middle">transaction amount band, lower edge; fraud rate on the training rows</text>
 </svg></div>
         
-        <figcaption>Fraud rate by amount band on all labelled rows. The $800 to $1,200 band runs 45 percent fraud; everything under $200 sits near zero. Amount is the strongest single feature and it is not monotonic.</figcaption>
+        <figcaption>Fraud rate by amount band on the training rows. The $800 to $1,200 band runs 46 percent fraud; everything under $200 sits near zero. Amount is not monotonic.</figcaption>
         <details>
           <summary>Show the numbers</summary>
-          <div class="tbl"><table><thead><tr><th>amount band</th><th>fraud rate</th><th>fraud rows</th><th>rows</th></tr></thead><tbody><tr><td>$0 to $10</td><td>0.119%</td><td>460</td><td>386,899</td></tr><tr><td>$10 to $20</td><td>0.632%</td><td>646</td><td>102,224</td></tr><tr><td>$20 to $50</td><td>0.125%</td><td>357</td><td>285,473</td></tr><tr><td>$50 to $100</td><td>0.009%</td><td>40</td><td>440,462</td></tr><tr><td>$100 to $200</td><td>0.081%</td><td>160</td><td>197,718</td></tr><tr><td>$200 to $300</td><td>1.738%</td><td>641</td><td>36,873</td></tr><tr><td>$300 to $500</td><td>6.894%</td><td>1,136</td><td>16,479</td></tr><tr><td>$500 to $800</td><td>8.725%</td><td>805</td><td>9,226</td></tr><tr><td>$800 to $1200</td><td>44.662%</td><td>2,213</td><td>4,955</td></tr><tr><td>$1200 to $30000</td><td>1.483%</td><td>38</td><td>2,563</td></tr></tbody></table></div>
+          <div class="tbl"><table><thead><tr><th>amount band</th><th>fraud rate</th><th>fraud rows</th><th>rows</th></tr></thead><tbody><tr><td>$0 to $50</td><td>0.201%</td><td>1,379</td><td>685,955</td></tr><tr><td>$50 to $200</td><td>0.034%</td><td>190</td><td>565,058</td></tr><tr><td>$200 to $300</td><td>1.827%</td><td>598</td><td>32,723</td></tr><tr><td>$300 to $500</td><td>7.294%</td><td>1,065</td><td>14,601</td></tr><tr><td>$500 to $800</td><td>9.262%</td><td>762</td><td>8,227</td></tr><tr><td>$800 to $1200</td><td>45.549%</td><td>2,067</td><td>4,538</td></tr><tr><td>$1200 to $up</td><td>1.683%</td><td>38</td><td>2,258</td></tr></tbody></table></div>
         </details>
       </figure>
 
@@ -154,60 +145,52 @@
         <div class="l"><span class="idx">04</span><h2>Three models, one comparison</h2></div>
       </div>
       <div class="case-prose reveal">
-        <p>I fit a logistic regression on the standardized features, a weight-of-evidence scorecard (optbinning bins each feature on the training rows, a logistic regression fits on the WOE columns, and I added one category-by-amount cross bin), and a gradient boosting classifier.</p>
+        <p>I fit a logistic regression on the standardized features, a weight-of-evidence scorecard (optbinning bins each numeric feature on the training rows, the category and cross-bin columns get a smoothed WOE per level, and a logistic regression fits on the WOE columns), and a gradient boosting classifier.</p>
       </div>
       <figure class="case-figure reveal">
-        <div class="viz"><svg viewBox="0 0 700 320" role="img" aria-labelledby="mdlTitle mdlDesc">
+        <div class="viz"><svg viewBox="0 0 700 330" role="img" aria-labelledby="mdlTitle mdlDesc">
 <title id="mdlTitle">December holdout: average precision, precision and recall for three models with 95 percent intervals</title>
-<desc id="mdlDesc">Three panels of dot and whisker marks. Gradient boosting leads on every measure: average precision 0.80, precision 0.54 and recall 0.82 at the November threshold, against 0.28, 0.38 and 0.30 for the scorecard and 0.10, 0.18 and 0.48 for logistic regression. The 70 percent target line sits above every precision mark.</desc>
-<text x="46" y="26" fill="#111317" font-size="11">average precision</text>
-<line x1="46" y1="240.0" x2="221" y2="240.0" stroke="rgba(17,19,23,0.09)"/>
-<text x="38" y="244.0" text-anchor="end">0%</text>
-<line x1="46" y1="192.5" x2="221" y2="192.5" stroke="rgba(17,19,23,0.09)"/>
-<text x="38" y="196.5" text-anchor="end">25%</text>
-<line x1="46" y1="145.0" x2="221" y2="145.0" stroke="rgba(17,19,23,0.09)"/>
-<text x="38" y="149.0" text-anchor="end">50%</text>
-<line x1="46" y1="97.5" x2="221" y2="97.5" stroke="rgba(17,19,23,0.09)"/>
-<text x="38" y="101.5" text-anchor="end">75%</text>
-<line x1="46" y1="50.0" x2="221" y2="50.0" stroke="rgba(17,19,23,0.09)"/>
-<text x="38" y="54.0" text-anchor="end">100%</text>
-<g class="pt"><title>Gradient boosting: average precision 0.805 (95% interval 0.722 to 0.866)</title><rect x="55.2" y="50" width="40" height="190" fill="transparent"/><line x1="75.2" y1="102.7" x2="75.2" y2="75.5" stroke="#f37021" stroke-width="2" stroke-linecap="round"/><circle cx="75.2" cy="87.1" r="6" fill="#f37021" stroke="#ffffff" stroke-width="2"/><text x="85.2" y="91.1" fill="#111317" font-size="11">80%</text></g>
-<g class="pt"><title>WOE scorecard: average precision 0.280 (95% interval 0.177 to 0.378)</title><rect x="113.5" y="50" width="40" height="190" fill="transparent"/><line x1="133.5" y1="206.3" x2="133.5" y2="168.1" stroke="#2a78d6" stroke-width="2" stroke-linecap="round"/><circle cx="133.5" cy="186.8" r="6" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/><text x="143.5" y="190.8" fill="#111317" font-size="11">28%</text></g>
-<g class="pt"><title>Logistic regression: average precision 0.105 (95% interval 0.063 to 0.149)</title><rect x="171.8" y="50" width="40" height="190" fill="transparent"/><line x1="191.8" y1="228.1" x2="191.8" y2="211.7" stroke="#1baf7a" stroke-width="2" stroke-linecap="round"/><circle cx="191.8" cy="220.1" r="6" fill="#1baf7a" stroke="#ffffff" stroke-width="2"/><text x="201.8" y="224.1" fill="#111317" font-size="11">10%</text></g>
-<text x="266" y="26" fill="#111317" font-size="11">precision at the point</text>
-<line x1="266" y1="240.0" x2="441" y2="240.0" stroke="rgba(17,19,23,0.09)"/>
-<line x1="266" y1="192.5" x2="441" y2="192.5" stroke="rgba(17,19,23,0.09)"/>
-<line x1="266" y1="145.0" x2="441" y2="145.0" stroke="rgba(17,19,23,0.09)"/>
-<line x1="266" y1="97.5" x2="441" y2="97.5" stroke="rgba(17,19,23,0.09)"/>
-<line x1="266" y1="50.0" x2="441" y2="50.0" stroke="rgba(17,19,23,0.09)"/>
-<line x1="266" y1="107.0" x2="441" y2="107.0" stroke="#111317" stroke-width="1.5"/>
-<text x="441" y="101.0" text-anchor="end" fill="#111317" font-size="11">70% target</text>
-<g class="pt"><title>Gradient boosting: precision at the point 0.535 (95% interval 0.409 to 0.631)</title><rect x="275.2" y="50" width="40" height="190" fill="transparent"/><line x1="295.2" y1="162.2" x2="295.2" y2="120.2" stroke="#f37021" stroke-width="2" stroke-linecap="round"/><circle cx="295.2" cy="138.3" r="6" fill="#f37021" stroke="#ffffff" stroke-width="2"/><text x="305.2" y="142.3" fill="#111317" font-size="11">54%</text></g>
-<g class="pt"><title>WOE scorecard: precision at the point 0.382 (95% interval 0.239 to 0.514)</title><rect x="333.5" y="50" width="40" height="190" fill="transparent"/><line x1="353.5" y1="194.6" x2="353.5" y2="142.3" stroke="#2a78d6" stroke-width="2" stroke-linecap="round"/><circle cx="353.5" cy="167.5" r="6" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/><text x="363.5" y="171.5" fill="#111317" font-size="11">38%</text></g>
-<g class="pt"><title>Logistic regression: precision at the point 0.182 (95% interval 0.110 to 0.244)</title><rect x="391.8" y="50" width="40" height="190" fill="transparent"/><line x1="411.8" y1="219.0" x2="411.8" y2="193.7" stroke="#1baf7a" stroke-width="2" stroke-linecap="round"/><circle cx="411.8" cy="205.4" r="6" fill="#1baf7a" stroke="#ffffff" stroke-width="2"/><text x="421.8" y="209.4" fill="#111317" font-size="11">18%</text></g>
-<text x="486" y="26" fill="#111317" font-size="11">recall at the point</text>
-<line x1="486" y1="240.0" x2="661" y2="240.0" stroke="rgba(17,19,23,0.09)"/>
-<line x1="486" y1="192.5" x2="661" y2="192.5" stroke="rgba(17,19,23,0.09)"/>
-<line x1="486" y1="145.0" x2="661" y2="145.0" stroke="rgba(17,19,23,0.09)"/>
-<line x1="486" y1="97.5" x2="661" y2="97.5" stroke="rgba(17,19,23,0.09)"/>
-<line x1="486" y1="50.0" x2="661" y2="50.0" stroke="rgba(17,19,23,0.09)"/>
-<line x1="486" y1="107.0" x2="661" y2="107.0" stroke="#111317" stroke-width="1.5"/>
-<text x="661" y="101.0" text-anchor="end" fill="#111317" font-size="11">70% target</text>
-<g class="pt"><title>Gradient boosting: recall at the point 0.821 (95% interval 0.759 to 0.882)</title><rect x="495.2" y="50" width="40" height="190" fill="transparent"/><line x1="515.2" y1="95.9" x2="515.2" y2="72.3" stroke="#f37021" stroke-width="2" stroke-linecap="round"/><circle cx="515.2" cy="84.1" r="6" fill="#f37021" stroke="#ffffff" stroke-width="2"/><text x="525.2" y="88.1" fill="#111317" font-size="11">82%</text></g>
-<g class="pt"><title>WOE scorecard: recall at the point 0.297 (95% interval 0.209 to 0.398)</title><rect x="553.5" y="50" width="40" height="190" fill="transparent"/><line x1="573.5" y1="200.3" x2="573.5" y2="164.4" stroke="#2a78d6" stroke-width="2" stroke-linecap="round"/><circle cx="573.5" cy="183.5" r="6" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/><text x="583.5" y="187.5" fill="#111317" font-size="11">30%</text></g>
-<g class="pt"><title>Logistic regression: recall at the point 0.482 (95% interval 0.398 to 0.558)</title><rect x="611.8" y="50" width="40" height="190" fill="transparent"/><line x1="631.8" y1="164.4" x2="631.8" y2="133.9" stroke="#1baf7a" stroke-width="2" stroke-linecap="round"/><circle cx="631.8" cy="148.4" r="6" fill="#1baf7a" stroke="#ffffff" stroke-width="2"/><text x="641.8" y="152.4" fill="#111317" font-size="11">48%</text></g>
+<desc id="mdlDesc">Grouped columns. Gradient boosting leads on every measure: average precision 0.83, precision 57 percent and recall 84 percent at the November threshold, against 0.56, 50 and 58 for the scorecard and 0.10, 18 and 54 for logistic regression, which never qualified and is scored at 10 alerts a day. The 70 percent target line sits above every precision column.</desc>
+<line x1="60" y1="250.0" x2="680" y2="250.0" stroke="rgba(17,19,23,0.09)"/>
+<text x="52" y="254.0" text-anchor="end">0%</text>
+<line x1="60" y1="200.0" x2="680" y2="200.0" stroke="rgba(17,19,23,0.09)"/>
+<text x="52" y="204.0" text-anchor="end">25%</text>
+<line x1="60" y1="150.0" x2="680" y2="150.0" stroke="rgba(17,19,23,0.09)"/>
+<text x="52" y="154.0" text-anchor="end">50%</text>
+<line x1="60" y1="100.0" x2="680" y2="100.0" stroke="rgba(17,19,23,0.09)"/>
+<text x="52" y="104.0" text-anchor="end">75%</text>
+<line x1="60" y1="50.0" x2="680" y2="50.0" stroke="rgba(17,19,23,0.09)"/>
+<text x="52" y="54.0" text-anchor="end">100%</text>
+<text x="163" y="270" text-anchor="middle" fill="#111317">average precision</text>
+<g class="pt"><title>Gradient boosting: average precision 0.828 (95% interval 0.758 to 0.879)</title><rect x="87.3" y="84.4" width="44" height="165.6" rx="3" fill="#f37021"/><line x1="109.3" y1="98.4" x2="109.3" y2="74.2" stroke="#111317" stroke-width="1.5"/><text x="109.3" y="68.2" text-anchor="middle" fill="#111317" font-size="11" stroke="#ffffff" stroke-width="3" paint-order="stroke">83%</text></g>
+<g class="pt"><title>WOE scorecard: average precision 0.563 (95% interval 0.456 to 0.647)</title><rect x="141.3" y="137.4" width="44" height="112.6" rx="3" fill="#2a78d6"/><line x1="163.3" y1="158.8" x2="163.3" y2="120.6" stroke="#111317" stroke-width="1.5"/><text x="163.3" y="114.6" text-anchor="middle" fill="#111317" font-size="11" stroke="#ffffff" stroke-width="3" paint-order="stroke">56%</text></g>
+<g class="pt"><title>Logistic regression: average precision 0.105 (95% interval 0.062 to 0.151)</title><rect x="195.3" y="229.1" width="44" height="20.9" rx="3" fill="#1baf7a"/><line x1="217.3" y1="237.6" x2="217.3" y2="219.9" stroke="#111317" stroke-width="1.5"/><text x="217.3" y="213.9" text-anchor="middle" fill="#111317" font-size="11" stroke="#ffffff" stroke-width="3" paint-order="stroke">10%</text></g>
+<text x="370" y="270" text-anchor="middle" fill="#111317">precision at the point</text>
+<line x1="275" y1="110.0" x2="465" y2="110.0" stroke="#111317" stroke-width="1.5"/>
+<text x="465" y="104.0" text-anchor="end" fill="#111317" font-size="11" stroke="#ffffff" stroke-width="3" paint-order="stroke">70% target</text>
+<g class="pt"><title>Gradient boosting: precision at the point 0.567 (95% interval 0.438 to 0.665)</title><rect x="294.0" y="136.5" width="44" height="113.5" rx="3" fill="#f37021"/><line x1="316.0" y1="162.3" x2="316.0" y2="117.0" stroke="#111317" stroke-width="1.5"/><text x="316.0" y="111.0" text-anchor="middle" fill="#111317" font-size="11" stroke="#ffffff" stroke-width="3" paint-order="stroke">57%</text></g>
+<g class="pt"><title>WOE scorecard: precision at the point 0.496 (95% interval 0.361 to 0.599)</title><rect x="348.0" y="150.9" width="44" height="99.1" rx="3" fill="#2a78d6"/><line x1="370.0" y1="177.8" x2="370.0" y2="130.2" stroke="#111317" stroke-width="1.5"/><text x="370.0" y="124.2" text-anchor="middle" fill="#111317" font-size="11" stroke="#ffffff" stroke-width="3" paint-order="stroke">50%</text></g>
+<g class="pt"><title>Logistic regression: precision at the point 0.175 (95% interval 0.107 to 0.242)</title><rect x="402.0" y="215.0" width="44" height="35.0" rx="3" fill="#1baf7a"/><line x1="424.0" y1="228.7" x2="424.0" y2="201.6" stroke="#111317" stroke-width="1.5"/><text x="424.0" y="195.6" text-anchor="middle" fill="#111317" font-size="11" stroke="#ffffff" stroke-width="3" paint-order="stroke">18%</text></g>
+<text x="577" y="270" text-anchor="middle" fill="#111317">recall at the point</text>
+<line x1="481" y1="110.0" x2="672" y2="110.0" stroke="#111317" stroke-width="1.5"/>
+<text x="672" y="104.0" text-anchor="end" fill="#111317" font-size="11" stroke="#ffffff" stroke-width="3" paint-order="stroke">70% target</text>
+<g class="pt"><title>Gradient boosting: recall at the point 0.841 (95% interval 0.791 to 0.886)</title><rect x="500.7" y="81.8" width="44" height="168.2" rx="3" fill="#f37021"/><line x1="522.7" y1="91.7" x2="522.7" y2="72.7" stroke="#111317" stroke-width="1.5"/><text x="522.7" y="66.7" text-anchor="middle" fill="#111317" font-size="11" stroke="#ffffff" stroke-width="3" paint-order="stroke">84%</text></g>
+<g class="pt"><title>WOE scorecard: recall at the point 0.579 (95% interval 0.508 to 0.651)</title><rect x="554.7" y="134.1" width="44" height="115.9" rx="3" fill="#2a78d6"/><line x1="576.7" y1="148.3" x2="576.7" y2="119.7" stroke="#111317" stroke-width="1.5"/><text x="576.7" y="113.7" text-anchor="middle" fill="#111317" font-size="11" stroke="#ffffff" stroke-width="3" paint-order="stroke">58%</text></g>
+<g class="pt"><title>Logistic regression: recall at the point 0.538 (95% interval 0.447 to 0.619)</title><rect x="608.7" y="142.3" width="44" height="107.7" rx="3" fill="#1baf7a"/><line x1="630.7" y1="160.6" x2="630.7" y2="126.1" stroke="#111317" stroke-width="1.5"/><text x="630.7" y="120.1" text-anchor="middle" fill="#111317" font-size="11" stroke="#ffffff" stroke-width="3" paint-order="stroke">54%</text></g>
+<text x="370" y="324" text-anchor="middle">December 2020; whiskers are 95 percent card-cluster bootstrap intervals</text>
 </svg></div>
         <div class="viz-legend"><span><i style="background:#f37021"></i>Gradient boosting</span><span><i style="background:#2a78d6"></i>WOE scorecard</span><span><i style="background:#1baf7a"></i>Logistic regression</span></div>
-        <figcaption>December holdout. Whiskers are 95 percent intervals from resampling cardholders, since fraud clusters by card. The logistic regression never reached 70 percent precision on November, so its threshold raises the same number of November alerts as gradient boosting.</figcaption>
+        <figcaption>December holdout. Whiskers are conditional card-cluster intervals.</figcaption>
         <details>
           <summary>Show the numbers</summary>
-          <div class="tbl"><table><thead><tr><th>model</th><th>AP</th><th>95% interval</th><th>precision</th><th>95% interval</th><th>recall</th><th>95% interval</th><th>alerts per day</th><th>dollar recall</th></tr></thead><tbody><tr><td>Gradient boosting</td><td>0.805</td><td>0.72 to 0.87</td><td>0.535</td><td>0.41 to 0.63</td><td>0.821</td><td>0.76 to 0.88</td><td>9.6</td><td>0.93</td></tr><tr><td>WOE scorecard</td><td>0.280</td><td>0.18 to 0.38</td><td>0.382</td><td>0.24 to 0.51</td><td>0.297</td><td>0.21 to 0.40</td><td>4.9</td><td>0.44</td></tr><tr><td>Logistic regression</td><td>0.105</td><td>0.06 to 0.15</td><td>0.182</td><td>0.11 to 0.24</td><td>0.482</td><td>0.40 to 0.56</td><td>16.6</td><td>0.78</td></tr></tbody></table></div>
+          <div class="tbl"><table><thead><tr><th>model</th><th>AP</th><th>95% interval</th><th>precision</th><th>95% interval</th><th>recall</th><th>95% interval</th><th>alerts per day</th><th>dollar recall</th><th>reached 70% on Nov</th></tr></thead><tbody><tr><td>Gradient boosting</td><td>0.828</td><td>0.76 to 0.88</td><td>0.567</td><td>0.44 to 0.66</td><td>0.841</td><td>0.79 to 0.89</td><td>9.3</td><td>0.94</td><td>yes</td></tr><tr><td>WOE scorecard</td><td>0.563</td><td>0.46 to 0.65</td><td>0.496</td><td>0.36 to 0.60</td><td>0.579</td><td>0.51 to 0.65</td><td>7.4</td><td>0.77</td><td>yes</td></tr><tr><td>Logistic regression</td><td>0.105</td><td>0.06 to 0.15</td><td>0.175</td><td>0.11 to 0.24</td><td>0.538</td><td>0.45 to 0.62</td><td>19.4</td><td>0.83</td><td>no</td></tr></tbody></table></div>
         </details>
       </figure>
+      <div class="case-table reveal"><table><thead><tr><th>Model</th><th>Dec AP</th><th>Precision</th><th>Recall</th><th>Alerts/day</th><th>Dollar recall</th><th>Reached 70% precision on Nov</th></tr></thead><tbody><tr><td>Gradient boosting</td><td>0.83</td><td>57%</td><td>84%</td><td>9</td><td>94%</td><td>yes</td></tr><tr><td>WOE scorecard</td><td>0.56</td><td>50%</td><td>58%</td><td>7</td><td>77%</td><td>yes</td></tr><tr><td>Logistic regression</td><td>0.10</td><td>18%</td><td>54%</td><td>19</td><td>83%</td><td>no, scored at 10 alerts a day</td></tr></tbody></table></div>
       <figure class="case-figure reveal">
         <div class="viz"><svg viewBox="0 0 700 420" role="img" aria-labelledby="prTitle prDesc">
 <title id="prTitle">Precision and recall curves on the December holdout, with each model's operating point</title>
-<desc id="prDesc">Three curves. Gradient boosting stays above 70 percent precision out to about 75 percent recall; the scorecard and the logistic regression drop below 70 percent precision within the first few percent of recall. Dots mark each model's November threshold.</desc>
+<desc id="prDesc">Three curves. Gradient boosting stays above 70 percent precision out to about 79 percent recall, the scorecard to about 48 percent, and the logistic regression never reaches 70 percent precision. Dots mark each model's operating point.</desc>
 <rect x="483.0" y="30.0" width="177.0" height="99.0" fill="rgba(243,112,33,0.08)"/>
 <text x="571.5" y="79.5" text-anchor="middle" fill="#111317" font-size="11">meets both targets</text>
 <line x1="70" y1="360.0" x2="660" y2="360.0" stroke="rgba(17,19,23,0.09)"/>
@@ -240,22 +223,22 @@
 <text x="477.0" y="44" text-anchor="end" fill="#111317" font-size="11">70% recall</text>
 <text x="365" y="402" text-anchor="middle">recall</text>
 <text x="20" y="18" fill="#6b7077">precision</text>
-<polyline points="70.0,30.0 608.6,276.3 635.8,316.0 647.9,330.1 650.9,345.0 650.9,341.9 650.9,337.4 653.9,351.8 653.9,350.9 653.9,349.9 653.9,348.6 653.9,347.0 657.0,356.2 657.0,356.0 657.0,355.8 657.0,355.6 657.0,355.4 657.0,355.2 657.0,354.9 657.0,354.6 657.0,354.3 657.0,353.9 657.0,353.5 657.0,353.0 657.0,352.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.2 660.0,359.2 660.0,359.2 660.0,359.2 660.0,359.2 660.0,359.2 660.0,359.2 660.0,359.2 660.0,359.2 660.0,359.2 660.0,359.2 660.0,359.2 660.0,359.2 660.0,359.2 660.0,359.2 660.0,359.1 660.0,359.1 660.0,359.1 660.0,359.1 660.0,359.1 660.0,359.1 660.0,359.1 660.0,359.1 660.0,359.1 660.0,359.1 660.0,359.1 660.0,359.0 660.0,359.0 660.0,359.0 660.0,359.0 660.0,359.0 660.0,359.0 660.0,359.0 660.0,359.0 660.0,359.0 660.0,358.9 660.0,358.9 660.0,358.9 660.0,358.9 660.0,358.9 660.0,358.9 660.0,358.9 660.0,358.9 660.0,358.8 660.0,358.8 660.0,358.8 660.0,358.8 660.0,358.8 660.0,358.8 660.0,358.7 660.0,358.7 660.0,358.7 660.0,358.7 660.0,358.7 660.0,358.7 660.0,358.6 660.0,358.6 660.0,358.6 660.0,358.6 660.0,358.6 660.0,358.5 660.0,358.5 660.0,358.5 660.0,358.5 660.0,358.4 660.0,358.4 660.0,358.4 660.0,358.4 660.0,358.3 660.0,358.3 660.0,358.3 660.0,358.3 660.0,358.2 660.0,358.2 660.0,358.1 660.0,358.1 660.0,358.1 660.0,358.0 660.0,358.0 660.0,357.9 660.0,357.9 660.0,357.8 660.0,357.8 660.0,357.7 660.0,357.7 660.0,357.6 660.0,357.5 660.0,357.5 660.0,357.4 660.0,357.3 660.0,357.2 660.0,357.1 660.0,357.0 660.0,356.9 660.0,356.8 660.0,356.7 660.0,356.6 660.0,356.5 660.0,356.3" fill="none" stroke="#f37021" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="70.0,30.0 460.3,298.0 508.7,325.3 529.9,335.7 554.1,340.9 578.3,344.0 602.5,346.1 614.6,347.8 623.7,349.1 629.7,351.2 629.7,350.2 632.7,352.0 635.8,354.5 635.8,354.1 635.8,353.7 635.8,353.2 635.8,352.6 638.8,354.8 641.8,355.3 641.8,355.0 644.9,355.5 647.9,355.7 650.9,356.1 650.9,355.9 653.9,357.1 653.9,357.0 653.9,356.9 653.9,356.8 653.9,356.6 653.9,356.5 653.9,356.4 653.9,356.2 657.0,357.3 657.0,357.2 657.0,357.2 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.2 660.0,359.2 660.0,359.2 660.0,359.2 660.0,359.2 660.0,359.2 660.0,359.2 660.0,359.2 660.0,359.2 660.0,359.2 660.0,359.2 660.0,359.2 660.0,359.2 660.0,359.2 660.0,359.2 660.0,359.1 660.0,359.1 660.0,359.1 660.0,359.1 660.0,359.1 660.0,359.1 660.0,359.1 660.0,359.1 660.0,359.1 660.0,359.1 660.0,359.1 660.0,359.0 660.0,359.0 660.0,359.0 660.0,359.0 660.0,359.0 660.0,359.0 660.0,359.0 660.0,359.0 660.0,359.0 660.0,358.9 660.0,358.9 660.0,358.9 660.0,358.9 660.0,358.9 660.0,358.9 660.0,358.9 660.0,358.9 660.0,358.8 660.0,358.8 660.0,358.8 660.0,358.8 660.0,358.8 660.0,358.8 660.0,358.7 660.0,358.7 660.0,358.7 660.0,358.7 660.0,358.7 660.0,358.7 660.0,358.6 660.0,358.6 660.0,358.6 660.0,358.6 660.0,358.6 660.0,358.5 660.0,358.5 660.0,358.5 660.0,358.5 660.0,358.4 660.0,358.4 660.0,358.4 660.0,358.4 660.0,358.4 660.0,358.3 660.0,358.3 660.0,358.3 660.0,358.2 660.0,358.2 660.0,358.1 660.0,358.1 660.0,358.1 660.0,358.0 660.0,358.0 660.0,357.9 660.0,357.9 660.0,357.8 660.0,357.8 660.0,357.7 660.0,357.7 660.0,357.6 660.0,357.5 660.0,357.5 660.0,357.4" fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="70.0,30.0 414.9,307.8 466.4,329.6 484.5,338.7 499.6,346.7 499.6,343.4 502.6,348.8 505.7,350.4 508.7,351.5 511.7,352.4 514.7,353.1 517.8,353.7 526.9,354.1 542.0,354.4 545.0,354.8 554.1,355.6 554.1,355.3 554.1,355.0 563.2,355.7 566.2,356.1 566.2,355.9 569.3,356.3 581.4,356.4 584.4,356.5 596.5,356.7 596.5,356.6 602.5,356.9 602.5,356.8 608.6,357.0 614.6,357.1 617.6,357.2 626.7,357.3 626.7,357.2 629.7,357.5 629.7,357.5 629.7,357.4 632.7,357.6 635.8,358.1 635.8,358.1 635.8,358.1 635.8,358.0 635.8,358.0 635.8,357.9 635.8,357.9 635.8,357.8 635.8,357.8 635.8,357.7 635.8,357.6 638.8,358.3 638.8,358.2 638.8,358.2 638.8,358.2 641.8,358.8 641.8,358.8 641.8,358.8 641.8,358.7 641.8,358.7 641.8,358.7 641.8,358.7 641.8,358.7 641.8,358.6 641.8,358.6 641.8,358.6 641.8,358.6 641.8,358.6 641.8,358.5 641.8,358.5 641.8,358.5 641.8,358.5 641.8,358.4 641.8,358.4 641.8,358.4 641.8,358.4 641.8,358.3 641.8,358.3 644.9,358.9 644.9,358.9 644.9,358.9 644.9,358.9 644.9,358.8 644.9,358.8 644.9,358.8 644.9,358.8 647.9,358.9 647.9,358.9 647.9,358.9 647.9,358.9 650.9,359.1 650.9,359.1 650.9,359.1 650.9,359.1 650.9,359.1 650.9,359.1 650.9,359.1 650.9,359.1 650.9,359.0 650.9,359.0 650.9,359.0 650.9,359.0 650.9,359.0 650.9,359.0 650.9,359.0 650.9,359.0 650.9,359.0 653.9,359.2 653.9,359.2 653.9,359.2 653.9,359.2 653.9,359.2 653.9,359.2 653.9,359.2 653.9,359.1 653.9,359.1 653.9,359.1 653.9,359.1 657.0,359.3 657.0,359.3 657.0,359.3 657.0,359.3 657.0,359.3 657.0,359.3 657.0,359.2 657.0,359.2 657.0,359.2 657.0,359.2 657.0,359.2 657.0,359.2 657.0,359.2 657.0,359.2 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3" fill="none" stroke="#1baf7a" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-<g class="pt"><title>Gradient boosting at the November threshold: precision 0.535, recall 0.821</title><circle cx="554.1" cy="183.4" r="7" fill="#f37021" stroke="#ffffff" stroke-width="2"/></g>
-<g class="pt"><title>WOE scorecard at the November threshold: precision 0.382, recall 0.297</title><circle cx="245.5" cy="234.1" r="7" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/></g>
-<g class="pt"><title>Logistic regression at the November threshold: precision 0.182, recall 0.482</title><circle cx="354.4" cy="299.9" r="7" fill="#1baf7a" stroke="#ffffff" stroke-width="2"/></g>
+<polyline points="70.0,30.0 614.6,275.4 632.7,316.3 647.9,330.1 653.9,341.9 653.9,337.3 657.0,354.9 657.0,354.6 657.0,354.3 657.0,353.9 657.0,353.5 657.0,353.0 657.0,352.4 657.0,351.7 657.0,350.9 657.0,349.9 657.0,348.6 657.0,347.0 657.0,344.8 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.2 660.0,359.2 660.0,359.2 660.0,359.2 660.0,359.2 660.0,359.2 660.0,359.2 660.0,359.2 660.0,359.2 660.0,359.2 660.0,359.2 660.0,359.2 660.0,359.2 660.0,359.2 660.0,359.2 660.0,359.1 660.0,359.1 660.0,359.1 660.0,359.1 660.0,359.1 660.0,359.1 660.0,359.1 660.0,359.1 660.0,359.1 660.0,359.1 660.0,359.1 660.0,359.0 660.0,359.0 660.0,359.0 660.0,359.0 660.0,359.0 660.0,359.0 660.0,359.0 660.0,359.0 660.0,359.0 660.0,358.9 660.0,358.9 660.0,358.9 660.0,358.9 660.0,358.9 660.0,358.9 660.0,358.9 660.0,358.9 660.0,358.8 660.0,358.8 660.0,358.8 660.0,358.8 660.0,358.8 660.0,358.8 660.0,358.7 660.0,358.7 660.0,358.7 660.0,358.7 660.0,358.7 660.0,358.7 660.0,358.6 660.0,358.6 660.0,358.6 660.0,358.6 660.0,358.6 660.0,358.5 660.0,358.5 660.0,358.5 660.0,358.5 660.0,358.4 660.0,358.4 660.0,358.4 660.0,358.4 660.0,358.3 660.0,358.3 660.0,358.3 660.0,358.3 660.0,358.2 660.0,358.2 660.0,358.1 660.0,358.1 660.0,358.1 660.0,358.0 660.0,358.0 660.0,357.9 660.0,357.9 660.0,357.8 660.0,357.8 660.0,357.7 660.0,357.7 660.0,357.6 660.0,357.5 660.0,357.5 660.0,357.4 660.0,357.3 660.0,357.2 660.0,357.1 660.0,357.0 660.0,356.9 660.0,356.8 660.0,356.7 660.0,356.6 660.0,356.5 660.0,356.3 660.0,356.2 660.0,356.0 660.0,355.8 660.0,355.6 660.0,355.4 660.0,355.2" fill="none" stroke="#f37021" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="70.0,30.0 484.5,294.9 511.7,325.3 545.0,335.1 575.3,340.2 593.4,343.6 605.5,346.0 617.6,347.8 620.6,349.3 626.7,350.4 629.7,352.7 629.7,352.1 629.7,351.3 635.8,354.8 635.8,354.5 635.8,354.1 635.8,353.7 635.8,353.2 638.8,355.3 638.8,355.1 641.8,355.5 644.9,356.1 644.9,355.9 644.9,355.7 647.9,356.5 647.9,356.4 647.9,356.2 650.9,356.7 653.9,357.7 653.9,357.6 653.9,357.6 653.9,357.5 653.9,357.4 653.9,357.3 653.9,357.3 653.9,357.2 653.9,357.1 653.9,357.0 653.9,356.9 653.9,356.8 657.0,357.7 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.2 660.0,359.2 660.0,359.2 660.0,359.2 660.0,359.2 660.0,359.2 660.0,359.2 660.0,359.2 660.0,359.2 660.0,359.2 660.0,359.2 660.0,359.2 660.0,359.2 660.0,359.2 660.0,359.1 660.0,359.1 660.0,359.1 660.0,359.1 660.0,359.1 660.0,359.1 660.0,359.1 660.0,359.1 660.0,359.1 660.0,359.1 660.0,359.1 660.0,359.1 660.0,359.0 660.0,359.0 660.0,359.0 660.0,359.0 660.0,359.0 660.0,359.0 660.0,359.0 660.0,359.0 660.0,359.0 660.0,358.9 660.0,358.9 660.0,358.9 660.0,358.9 660.0,358.9 660.0,358.9 660.0,358.9 660.0,358.9 660.0,358.8 660.0,358.8 660.0,358.8 660.0,358.8 660.0,358.8 660.0,358.8 660.0,358.7 660.0,358.7 660.0,358.7 660.0,358.7 660.0,358.7 660.0,358.7 660.0,358.6 660.0,358.6 660.0,358.6 660.0,358.6 660.0,358.6 660.0,358.5 660.0,358.5 660.0,358.5 660.0,358.5 660.0,358.4 660.0,358.4 660.0,358.4 660.0,358.4 660.0,358.4 660.0,358.3 660.0,358.3 660.0,358.3 660.0,358.2 660.0,358.2 660.0,358.1 660.0,358.1 660.0,358.1 660.0,358.0 660.0,358.0 660.0,357.9 660.0,357.9 660.0,357.8 660.0,357.8" fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="70.0,30.0 414.9,308.0 466.4,329.7 484.5,338.7 499.6,346.7 499.6,343.4 502.6,348.8 505.7,350.4 511.7,351.5 514.7,353.1 514.7,352.3 517.8,353.7 526.9,354.1 542.0,354.4 548.1,354.7 554.1,355.3 554.1,355.0 560.2,355.5 566.2,355.9 566.2,355.7 569.3,356.1 572.3,356.3 581.4,356.4 587.4,356.5 596.5,356.7 596.5,356.6 602.5,356.8 605.5,356.9 608.6,357.0 614.6,357.1 623.7,357.1 626.7,357.2 629.7,357.5 629.7,357.5 629.7,357.4 629.7,357.3 635.8,358.1 635.8,358.0 635.8,358.0 635.8,357.9 635.8,357.9 635.8,357.8 635.8,357.8 635.8,357.7 635.8,357.6 635.8,357.6 638.8,358.2 638.8,358.2 638.8,358.2 638.8,358.1 638.8,358.1 641.8,358.7 641.8,358.7 641.8,358.7 641.8,358.7 641.8,358.7 641.8,358.6 641.8,358.6 641.8,358.6 641.8,358.6 641.8,358.6 641.8,358.5 641.8,358.5 641.8,358.5 641.8,358.5 641.8,358.4 641.8,358.4 641.8,358.4 641.8,358.4 641.8,358.3 641.8,358.3 641.8,358.3 644.9,358.9 644.9,358.9 644.9,358.9 644.9,358.8 644.9,358.8 644.9,358.8 644.9,358.8 644.9,358.8 644.9,358.8 644.9,358.7 647.9,358.9 647.9,358.9 647.9,358.9 647.9,358.9 650.9,359.1 650.9,359.1 650.9,359.1 650.9,359.1 650.9,359.1 650.9,359.1 650.9,359.1 650.9,359.1 650.9,359.1 650.9,359.0 650.9,359.0 650.9,359.0 650.9,359.0 650.9,359.0 650.9,359.0 650.9,359.0 650.9,359.0 650.9,359.0 650.9,358.9 653.9,359.2 653.9,359.2 653.9,359.2 653.9,359.2 653.9,359.2 653.9,359.2 653.9,359.1 653.9,359.1 653.9,359.1 657.0,359.3 657.0,359.3 657.0,359.3 657.0,359.3 657.0,359.3 657.0,359.2 657.0,359.2 657.0,359.2 657.0,359.2 657.0,359.2 657.0,359.2 657.0,359.2 657.0,359.2 657.0,359.2 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.4 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3 660.0,359.3" fill="none" stroke="#1baf7a" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<g class="pt"><title>Gradient boosting at the November threshold: precision 0.567, recall 0.841</title><circle cx="566.2" cy="172.7" r="7" fill="#f37021" stroke="#ffffff" stroke-width="2"/></g>
+<g class="pt"><title>WOE scorecard at the November threshold: precision 0.496, recall 0.579</title><circle cx="411.9" cy="196.4" r="7" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/></g>
+<g class="pt"><title>Logistic regression at the November threshold: precision 0.175, recall 0.538</title><circle cx="387.7" cy="302.2" r="7" fill="#1baf7a" stroke="#ffffff" stroke-width="2"/></g>
 </svg></div>
         <div class="viz-legend"><span><i style="background:#f37021"></i>Gradient boosting</span><span><i style="background:#2a78d6"></i>WOE scorecard</span><span><i style="background:#1baf7a"></i>Logistic regression</span></div>
-        <figcaption>The full precision and recall curves. Gradient boosting holds precision above 70 percent out to 75 percent recall in hindsight; the other two never reach the bar at any recall above a few percent.</figcaption>
+        <figcaption>The full precision and recall curves with each operating point.</figcaption>
         <details>
           <summary>Show the numbers</summary>
-          <div class="tbl"><table><thead><tr><th>model</th><th>precision at the point</th><th>recall at the point</th><th>score threshold</th><th>hindsight recall at 70% precision</th></tr></thead><tbody><tr><td>Gradient boosting</td><td>0.535</td><td>0.821</td><td>0.918</td><td>0.75</td></tr><tr><td>WOE scorecard</td><td>0.382</td><td>0.297</td><td>0.998</td><td>0.00</td></tr><tr><td>Logistic regression</td><td>0.182</td><td>0.482</td><td>0.986</td><td>0.00</td></tr></tbody></table></div>
+          <div class="tbl"><table><thead><tr><th>model</th><th>precision at the point</th><th>recall at the point</th><th>score threshold</th><th>oracle recall at 70% precision</th><th>qualifying point</th></tr></thead><tbody><tr><td>Gradient boosting</td><td>0.567</td><td>0.841</td><td>0.877</td><td>0.79</td><td>yes</td></tr><tr><td>WOE scorecard</td><td>0.496</td><td>0.579</td><td>0.995</td><td>0.48</td><td>yes</td></tr><tr><td>Logistic regression</td><td>0.175</td><td>0.538</td><td>0.979</td><td>0.00</td><td>no, 10 alerts a day</td></tr></tbody></table></div>
         </details>
       </figure>
       <div class="case-prose reveal">
-        <p>Gradient boosting reaches average precision 0.80 and, at the November threshold, 54 percent precision with 82 percent recall on 10 alerts a day, catching 93 percent of the fraud dollars. The scorecard reaches 0.28 and the raw logistic regression 0.10. I read the precision miss against the 70 percent target as the December base-rate halving, not the ranking, which is nearly unchanged from November.</p>
+        <p>Gradient boosting reaches average precision 0.83 and, at the November threshold, 57 percent precision with 84 percent recall on 9 alerts a day, catching 94 percent of the fraud dollars. The scorecard reaches 0.56 and the raw logistic regression 0.10, and the logistic regression never qualifies. The whiskers are card-cluster bootstrap intervals with the model and threshold held fixed, so they cover the December card mix and nothing else. The precision miss against the 70 percent target has the halved base rate as one plausible cause; ROC AUC barely moves from November to December (0.999 to 0.998), but average precision drops from 0.93 to 0.83 and I have not separated prevalence from drift in the fraud mix.</p>
       </div>
 
     </div>
@@ -267,136 +250,146 @@
         <div class="l"><span class="idx">05</span><h2>Where the signal lives</h2></div>
       </div>
       <figure class="case-figure reveal">
-        <div class="viz"><svg viewBox="0 0 700 404" role="img" aria-labelledby="impTitle impDesc">
-<title id="impTitle">Permutation importance on the validation month, drop in average precision</title>
-<desc id="impDesc">Horizontal bars for 17 features. Shuffling log amount costs 0.91 of average precision and shuffling category costs 0.81; the hour pair costs 0.12 to 0.13 and nothing else costs more than 0.07.</desc>
-<line x1="170.0" y1="14" x2="170.0" y2="370" stroke="rgba(17,19,23,0.09)"/>
-<text x="170.0" y="386" text-anchor="middle">0.00</text>
-<line x1="287.5" y1="14" x2="287.5" y2="370" stroke="rgba(17,19,23,0.09)"/>
-<text x="287.5" y="386" text-anchor="middle">0.25</text>
-<line x1="405.0" y1="14" x2="405.0" y2="370" stroke="rgba(17,19,23,0.09)"/>
-<text x="405.0" y="386" text-anchor="middle">0.50</text>
-<line x1="522.5" y1="14" x2="522.5" y2="370" stroke="rgba(17,19,23,0.09)"/>
-<text x="522.5" y="386" text-anchor="middle">0.75</text>
-<line x1="640.0" y1="14" x2="640.0" y2="370" stroke="rgba(17,19,23,0.09)"/>
-<text x="640.0" y="386" text-anchor="middle">1.00</text>
-<text x="405" y="402" text-anchor="middle">drop in average precision when the feature is shuffled</text>
-<text x="162" y="34" text-anchor="end" fill="#111317" font-size="11">log_amt</text>
-<g class="pt"><title>log_amt: AP drop 0.914 (sd 0.003)</title><rect x="170" y="24" width="429.5" height="12" rx="3" fill="#f37021"/>
-<line x1="598.0" y1="30" x2="600.9" y2="30" stroke="#111317" stroke-width="1.5"/>
-<text x="609.5" y="34" fill="#111317" font-size="11">0.914</text></g>
-<text x="162" y="54" text-anchor="end" fill="#111317" font-size="11">category</text>
-<g class="pt"><title>category: AP drop 0.814 (sd 0.026)</title><rect x="170" y="44" width="382.5" height="12" rx="3" fill="#f37021"/>
-<line x1="540.3" y1="50" x2="564.7" y2="50" stroke="#111317" stroke-width="1.5"/>
-<text x="562.5" y="54" fill="#111317" font-size="11">0.814</text></g>
-<text x="162" y="74" text-anchor="end" fill="#111317" font-size="11">hour_cos</text>
-<g class="pt"><title>hour_cos: AP drop 0.134 (sd 0.013)</title><rect x="170" y="64" width="62.9" height="12" rx="3" fill="#f37021"/>
-<line x1="226.6" y1="70" x2="239.3" y2="70" stroke="#111317" stroke-width="1.5"/>
-<text x="242.9" y="74" fill="#111317" font-size="11">0.134</text></g>
-<text x="162" y="94" text-anchor="end" fill="#111317" font-size="11">hour_sin</text>
-<g class="pt"><title>hour_sin: AP drop 0.122 (sd 0.008)</title><rect x="170" y="84" width="57.3" height="12" rx="3" fill="#f37021"/>
-<line x1="223.7" y1="90" x2="230.9" y2="90" stroke="#111317" stroke-width="1.5"/>
-<text x="237.3" y="94" fill="#111317" font-size="11">0.122</text></g>
-<text x="162" y="114" text-anchor="end" fill="#6b7077" font-size="11">age</text>
-<g class="pt"><title>age: AP drop 0.063 (sd 0.004)</title><rect x="170" y="104" width="29.4" height="12" rx="3" fill="rgba(17,19,23,0.18)"/>
-<line x1="197.7" y1="110" x2="201.1" y2="110" stroke="#111317" stroke-width="1.5"/>
-<text x="209.4" y="114" fill="#111317" font-size="11">0.063</text></g>
-<text x="162" y="134" text-anchor="end" fill="#6b7077" font-size="11">log_secs_since_prev</text>
-<g class="pt"><title>log_secs_since_prev: AP drop 0.060 (sd 0.006)</title><rect x="170" y="124" width="28.4" height="12" rx="3" fill="rgba(17,19,23,0.18)"/>
-<line x1="195.6" y1="130" x2="201.2" y2="130" stroke="#111317" stroke-width="1.5"/>
-<text x="208.4" y="134" fill="#111317" font-size="11">0.060</text></g>
-<text x="162" y="154" text-anchor="end" fill="#6b7077" font-size="11">amt_vs_prior_mean</text>
-<g class="pt"><title>amt_vs_prior_mean: AP drop 0.056 (sd 0.003)</title><rect x="170" y="144" width="26.1" height="12" rx="3" fill="rgba(17,19,23,0.18)"/>
-<line x1="194.5" y1="150" x2="197.7" y2="150" stroke="#111317" stroke-width="1.5"/>
-<text x="206.1" y="154" fill="#111317" font-size="11">0.056</text></g>
-<text x="162" y="174" text-anchor="end" fill="#6b7077" font-size="11">log_city_pop</text>
-<g class="pt"><title>log_city_pop: AP drop 0.042 (sd 0.001)</title><rect x="170" y="164" width="19.7" height="12" rx="3" fill="rgba(17,19,23,0.18)"/>
-<text x="199.7" y="174" fill="#111317" font-size="11">0.042</text></g>
-<text x="162" y="194" text-anchor="end" fill="#6b7077" font-size="11">n_prev_24h</text>
-<g class="pt"><title>n_prev_24h: AP drop 0.021 (sd 0.001)</title><rect x="170" y="184" width="10.1" height="12" rx="3" fill="rgba(17,19,23,0.18)"/>
-<text x="190.1" y="194" fill="#111317" font-size="11">0.021</text></g>
-<text x="162" y="214" text-anchor="end" fill="#6b7077" font-size="11">dow_cos</text>
-<g class="pt"><title>dow_cos: AP drop 0.007 (sd 0.001)</title><rect x="170" y="204" width="3.1" height="12" rx="3" fill="rgba(17,19,23,0.18)"/>
-<text x="183.1" y="214" fill="#111317" font-size="11">0.007</text></g>
-<text x="162" y="234" text-anchor="end" fill="#6b7077" font-size="11">dow_sin</text>
-<g class="pt"><title>dow_sin: AP drop 0.002 (sd 0.000)</title><rect x="170" y="224" width="1.0" height="12" rx="3" fill="rgba(17,19,23,0.18)"/>
-<text x="180.8" y="234" fill="#111317" font-size="11">0.002</text></g>
-<text x="162" y="254" text-anchor="end" fill="#6b7077" font-size="11">n_prev_1h</text>
-<g class="pt"><title>n_prev_1h: AP drop 0.000 (sd 0.001)</title><rect x="170" y="244" width="1.0" height="12" rx="3" fill="rgba(17,19,23,0.18)"/>
-<text x="180.1" y="254" fill="#111317" font-size="11">0.000</text></g>
-<text x="162" y="274" text-anchor="end" fill="#6b7077" font-size="11">month_cos</text>
-<g class="pt"><title>month_cos: AP drop 0.000 (sd 0.000)</title><rect x="170" y="264" width="1.0" height="12" rx="3" fill="rgba(17,19,23,0.18)"/>
-<text x="180.0" y="274" fill="#111317" font-size="11">0.000</text></g>
-<text x="162" y="294" text-anchor="end" fill="#6b7077" font-size="11">month_sin</text>
-<g class="pt"><title>month_sin: AP drop 0.000 (sd 0.000)</title><rect x="170" y="284" width="1.0" height="12" rx="3" fill="rgba(17,19,23,0.18)"/>
-<text x="180.0" y="294" fill="#111317" font-size="11">0.000</text></g>
-<text x="162" y="314" text-anchor="end" fill="#6b7077" font-size="11">first_txn</text>
-<g class="pt"><title>first_txn: AP drop 0.000 (sd 0.000)</title><rect x="170" y="304" width="1.0" height="12" rx="3" fill="rgba(17,19,23,0.18)"/>
-<text x="180.0" y="314" fill="#111317" font-size="11">0.000</text></g>
-<text x="162" y="334" text-anchor="end" fill="#6b7077" font-size="11">night</text>
-<g class="pt"><title>night: AP drop -0.000 (sd 0.000)</title><rect x="170" y="324" width="1.0" height="12" rx="3" fill="rgba(17,19,23,0.18)"/>
-<text x="180.0" y="334" fill="#111317" font-size="11">0.000</text></g>
-<text x="162" y="354" text-anchor="end" fill="#6b7077" font-size="11">home_merchant_km</text>
-<g class="pt"><title>home_merchant_km: AP drop -0.003 (sd 0.001)</title><rect x="170" y="344" width="1.0" height="12" rx="3" fill="rgba(17,19,23,0.18)"/>
-<text x="180.0" y="354" fill="#111317" font-size="11">-0.003</text></g>
+        <div class="viz"><svg viewBox="0 0 700 274" role="img" aria-labelledby="impTitle impDesc">
+<title id="impTitle">Grouped permutation importance on the validation month, drop in average precision</title>
+<desc id="impDesc">Horizontal bars for seven feature groups, ten repeats each. Shuffling the amount features costs 0.92 of average precision, category 0.81, the hour features 0.31, the cardholder features 0.13, velocity 0.06, and weekday, month and distance nothing.</desc>
+<line x1="250.0" y1="14" x2="250.0" y2="240" stroke="rgba(17,19,23,0.09)"/>
+<text x="250.0" y="256" text-anchor="middle">0.00</text>
+<line x1="347.5" y1="14" x2="347.5" y2="240" stroke="rgba(17,19,23,0.09)"/>
+<text x="347.5" y="256" text-anchor="middle">0.25</text>
+<line x1="445.0" y1="14" x2="445.0" y2="240" stroke="rgba(17,19,23,0.09)"/>
+<text x="445.0" y="256" text-anchor="middle">0.50</text>
+<line x1="542.5" y1="14" x2="542.5" y2="240" stroke="rgba(17,19,23,0.09)"/>
+<text x="542.5" y="256" text-anchor="middle">0.75</text>
+<line x1="640.0" y1="14" x2="640.0" y2="240" stroke="rgba(17,19,23,0.09)"/>
+<text x="640.0" y="256" text-anchor="middle">1.00</text>
+<text x="445" y="272" text-anchor="middle">drop in average precision when the group is shuffled</text>
+<text x="242" y="39" text-anchor="end" fill="#111317" font-size="11">amount</text>
+<g class="pt"><title>amount (log_amt, amt_vs_prior_mean): AP drop 0.919 (sd 0.004 over 10 repeats)</title><rect x="250" y="27" width="358.5" height="16" rx="3" fill="#f37021"/>
+<line x1="607.0" y1="35" x2="610.0" y2="35" stroke="#111317" stroke-width="1.5"/>
+<text x="618.5" y="39" fill="#111317" font-size="11">0.919</text></g>
+<text x="242" y="69" text-anchor="end" fill="#111317" font-size="11">category</text>
+<g class="pt"><title>category: AP drop 0.811 (sd 0.016 over 10 repeats)</title><rect x="250" y="57" width="316.4" height="16" rx="3" fill="#f37021"/>
+<line x1="560.1" y1="65" x2="572.7" y2="65" stroke="#111317" stroke-width="1.5"/>
+<text x="576.4" y="69" fill="#111317" font-size="11">0.811</text></g>
+<text x="242" y="99" text-anchor="end" fill="#111317" font-size="11">hour</text>
+<g class="pt"><title>hour (hour_sin, hour_cos, night): AP drop 0.315 (sd 0.017 over 10 repeats)</title><rect x="250" y="87" width="122.8" height="16" rx="3" fill="#f37021"/>
+<line x1="366.3" y1="95" x2="379.3" y2="95" stroke="#111317" stroke-width="1.5"/>
+<text x="382.8" y="99" fill="#111317" font-size="11">0.315</text></g>
+<text x="242" y="129" text-anchor="end" fill="#111317" font-size="11">cardholder</text>
+<g class="pt"><title>cardholder (age, log_city_pop): AP drop 0.130 (sd 0.012 over 10 repeats)</title><rect x="250" y="117" width="50.8" height="16" rx="3" fill="#f37021"/>
+<line x1="296.0" y1="125" x2="305.6" y2="125" stroke="#111317" stroke-width="1.5"/>
+<text x="310.8" y="129" fill="#111317" font-size="11">0.130</text></g>
+<text x="242" y="159" text-anchor="end" fill="#6b7077" font-size="11">velocity</text>
+<g class="pt"><title>velocity (n_prev_1h, n_prev_24h, log_secs_since_prev, first_txn): AP drop 0.058 (sd 0.007 over 10 repeats)</title><rect x="250" y="147" width="22.6" height="16" rx="3" fill="rgba(17,19,23,0.18)"/>
+<line x1="269.9" y1="155" x2="275.2" y2="155" stroke="#111317" stroke-width="1.5"/>
+<text x="282.6" y="159" fill="#111317" font-size="11">0.058</text></g>
+<text x="242" y="189" text-anchor="end" fill="#6b7077" font-size="11">weekday and month</text>
+<g class="pt"><title>weekday and month: AP drop 0.004 (sd 0.001 over 10 repeats)</title><rect x="250" y="177" width="1.4" height="16" rx="3" fill="rgba(17,19,23,0.18)"/>
+<text x="261.4" y="189" fill="#111317" font-size="11">0.004</text></g>
+<text x="242" y="219" text-anchor="end" fill="#6b7077" font-size="11">home_merchant_km</text>
+<g class="pt"><title>home_merchant_km: AP drop -0.001 (sd 0.001 over 10 repeats)</title><rect x="250" y="207" width="1.0" height="16" rx="3" fill="rgba(17,19,23,0.18)"/>
+<text x="260.0" y="219" fill="#111317" font-size="11">-0.001</text></g>
 </svg></div>
         
-        <figcaption>Permutation importance on November. Shuffling log amount costs 0.91 of average precision and shuffling category costs 0.81; nothing else costs more than 0.13.</figcaption>
+        <figcaption>Grouped permutation importance on November, ten repeats.</figcaption>
         <details>
           <summary>Show the numbers</summary>
-          <div class="tbl"><table><thead><tr><th>feature</th><th>AP drop</th><th>sd over repeats</th></tr></thead><tbody><tr><td>log_amt</td><td>0.914</td><td>0.003</td></tr><tr><td>category</td><td>0.814</td><td>0.026</td></tr><tr><td>hour_cos</td><td>0.134</td><td>0.013</td></tr><tr><td>hour_sin</td><td>0.122</td><td>0.008</td></tr><tr><td>age</td><td>0.063</td><td>0.004</td></tr><tr><td>log_secs_since_prev</td><td>0.060</td><td>0.006</td></tr><tr><td>amt_vs_prior_mean</td><td>0.056</td><td>0.003</td></tr><tr><td>log_city_pop</td><td>0.042</td><td>0.001</td></tr><tr><td>n_prev_24h</td><td>0.021</td><td>0.001</td></tr><tr><td>dow_cos</td><td>0.007</td><td>0.001</td></tr><tr><td>dow_sin</td><td>0.002</td><td>0.000</td></tr><tr><td>n_prev_1h</td><td>0.000</td><td>0.001</td></tr><tr><td>month_cos</td><td>0.000</td><td>0.000</td></tr><tr><td>month_sin</td><td>0.000</td><td>0.000</td></tr><tr><td>first_txn</td><td>0.000</td><td>0.000</td></tr><tr><td>night</td><td>-0.000</td><td>0.000</td></tr><tr><td>home_merchant_km</td><td>-0.003</td><td>0.001</td></tr></tbody></table></div>
+          <div class="tbl"><table><thead><tr><th>feature group</th><th>AP drop</th><th>sd over 10 repeats</th></tr></thead><tbody><tr><td>amount (log_amt, amt_vs_prior_mean)</td><td>0.919</td><td>0.004</td></tr><tr><td>category</td><td>0.811</td><td>0.016</td></tr><tr><td>hour (hour_sin, hour_cos, night)</td><td>0.315</td><td>0.017</td></tr><tr><td>cardholder (age, log_city_pop)</td><td>0.130</td><td>0.012</td></tr><tr><td>velocity (n_prev_1h, n_prev_24h, log_secs_since_prev, first_txn)</td><td>0.058</td><td>0.007</td></tr><tr><td>weekday and month</td><td>0.004</td><td>0.001</td></tr><tr><td>home_merchant_km</td><td>-0.001</td><td>0.001</td></tr></tbody></table></div>
         </details>
       </figure>
+      <div class="case-prose reveal">
+        <p>Shuffling feature groups together on November shows what the boosted model relies on. Amount costs 0.92 of average precision, category 0.81, hour 0.31, and nothing else more than 0.13. That is model reliance, not a statement about how the features combine, so I tested the combination directly.</p>
+      </div>
+      <figure class="case-figure reveal">
+        <div class="viz"><svg viewBox="0 0 700 248" role="img" aria-labelledby="ablTitle ablDesc">
+<title id="ablTitle">Scorecard ablation: December average precision by feature set</title>
+<desc id="ablDesc">Horizontal bars for six scorecard feature sets against a dashed line at gradient boosting's 0.83. Amount alone scores 0.02, category alone 0.003, the two added 0.02, the category by amount cross bin alone 0.37, all main effects 0.11, and the scorecard with the cross bin 0.56.</desc>
+<line x1="250.0" y1="18" x2="250.0" y2="214" stroke="rgba(17,19,23,0.09)"/>
+<text x="250.0" y="230" text-anchor="middle">0.0</text>
+<line x1="332.2" y1="18" x2="332.2" y2="214" stroke="rgba(17,19,23,0.09)"/>
+<text x="332.2" y="230" text-anchor="middle">0.2</text>
+<line x1="414.4" y1="18" x2="414.4" y2="214" stroke="rgba(17,19,23,0.09)"/>
+<text x="414.4" y="230" text-anchor="middle">0.4</text>
+<line x1="496.7" y1="18" x2="496.7" y2="214" stroke="rgba(17,19,23,0.09)"/>
+<text x="496.7" y="230" text-anchor="middle">0.6</text>
+<line x1="578.9" y1="18" x2="578.9" y2="214" stroke="rgba(17,19,23,0.09)"/>
+<text x="578.9" y="230" text-anchor="middle">0.8</text>
+<text x="435" y="246" text-anchor="middle">December average precision, same split and seed</text>
+<text x="242" y="43" text-anchor="end" fill="#111317" font-size="11">amount only</text>
+<g class="pt"><title>amount only: December AP 0.022, validation AP 0.043</title><rect x="250" y="31" width="9.2" height="16" rx="3" fill="#2a78d6"/><text x="267.2" y="43" fill="#111317" font-size="11">0.02</text></g>
+<text x="242" y="73" text-anchor="end" fill="#111317" font-size="11">category only</text>
+<g class="pt"><title>category only: December AP 0.003, validation AP 0.009</title><rect x="250" y="61" width="1.5" height="16" rx="3" fill="#2a78d6"/><text x="259.4" y="73" fill="#111317" font-size="11">0.00</text></g>
+<text x="242" y="103" text-anchor="end" fill="#111317" font-size="11">amount plus category, additive</text>
+<g class="pt"><title>amount plus category, additive: December AP 0.019, validation AP 0.033</title><rect x="250" y="91" width="8.0" height="16" rx="3" fill="#2a78d6"/><text x="266.0" y="103" fill="#111317" font-size="11">0.02</text></g>
+<text x="242" y="133" text-anchor="end" fill="#111317" font-size="11">amount by category cross bin only</text>
+<g class="pt"><title>amount by category cross bin only: December AP 0.369, validation AP 0.513</title><rect x="250" y="121" width="151.7" height="16" rx="3" fill="#2a78d6"/><text x="409.7" y="133" fill="#111317" font-size="11">0.37</text></g>
+<text x="242" y="163" text-anchor="end" fill="#111317" font-size="11">main effects scorecard</text>
+<g class="pt"><title>main effects scorecard: December AP 0.105, validation AP 0.209</title><rect x="250" y="151" width="43.3" height="16" rx="3" fill="#2a78d6"/><text x="301.3" y="163" fill="#111317" font-size="11">0.11</text></g>
+<text x="242" y="193" text-anchor="end" fill="#111317" font-size="11">scorecard with cross bin</text>
+<g class="pt"><title>scorecard with cross bin: December AP 0.563, validation AP 0.654</title><rect x="250" y="181" width="231.5" height="16" rx="3" fill="#2a78d6"/><text x="489.5" y="193" fill="#111317" font-size="11">0.56</text></g>
+<line x1="590.4" y1="14" x2="590.4" y2="214" stroke="#f37021" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="584.4" y="12" text-anchor="end" fill="#111317" font-size="11">gradient boosting 0.83</text>
+</svg></div>
+        
+        <figcaption>Scorecard ablation on December: one feature set at a time, same split and seed.</figcaption>
+        <details>
+          <summary>Show the numbers</summary>
+          <div class="tbl"><table><thead><tr><th>feature set</th><th>December AP</th><th>November AP</th><th>December ROC AUC</th></tr></thead><tbody><tr><td>amount only</td><td>0.022</td><td>0.043</td><td>0.921</td></tr><tr><td>category only</td><td>0.003</td><td>0.009</td><td>0.684</td></tr><tr><td>amount plus category, additive</td><td>0.019</td><td>0.033</td><td>0.923</td></tr><tr><td>amount by category cross bin only</td><td>0.369</td><td>0.513</td><td>0.966</td></tr><tr><td>main effects scorecard</td><td>0.105</td><td>0.209</td><td>0.965</td></tr><tr><td>scorecard with cross bin</td><td>0.563</td><td>0.654</td><td>0.987</td></tr><tr><td>gradient boosting, 10 percent legitimate downsample</td><td>0.795</td><td>0.922</td><td>0.997</td></tr><tr><td>gradient boosting, full training frame</td><td>0.828</td><td>0.927</td><td>0.998</td></tr></tbody></table></div>
+        </details>
+      </figure>
+      <div class="case-prose reveal">
+        <p>On the training rows, a $300 to $500 purchase runs 100 percent fraud in grocery_pos and 0 percent in travel, so the same amount means different things in different categories. The ablation makes the point in numbers. A scorecard on amount alone scores 0.02 on December, category alone 0.003, the two added together 0.02, and the single category-by-amount cross bin 0.37. All eleven main effects with category reach 0.11; adding the cross bin lifts that to 0.56. The tree model learns the same interaction and the rest on its own and scores 0.83. That gap is what I took from the exercise.</p>
+      </div>
       <figure class="case-figure reveal">
         <div class="viz"><svg viewBox="0 0 700 350" role="img" aria-labelledby="ivTitle ivDesc">
 <title id="ivTitle">Information value per feature from the scorecard's bins</title>
-<desc id="ivDesc">Horizontal bars for 13 binned features. The category by amount cross bin has the highest information value at 6.71, above amount at 4.33 and amount against the card's prior mean at 3.58; hour is 1.85 and everything else is below 0.6.</desc>
+<desc id="ivDesc">Horizontal bars for 13 binned features. The category by amount cross bin has the highest information value at 8.29, above amount at 4.02 and amount against the card's prior mean at 3.32; hour is 1.86 and everything else is below 0.6.</desc>
 <line x1="170.0" y1="14" x2="170.0" y2="316" stroke="rgba(17,19,23,0.09)"/>
 <text x="170.0" y="332" text-anchor="middle">0</text>
-<line x1="298.6" y1="14" x2="298.6" y2="316" stroke="rgba(17,19,23,0.09)"/>
-<text x="298.6" y="332" text-anchor="middle">2</text>
-<line x1="427.1" y1="14" x2="427.1" y2="316" stroke="rgba(17,19,23,0.09)"/>
-<text x="427.1" y="332" text-anchor="middle">4</text>
-<line x1="555.7" y1="14" x2="555.7" y2="316" stroke="rgba(17,19,23,0.09)"/>
-<text x="555.7" y="332" text-anchor="middle">6</text>
+<line x1="270.0" y1="14" x2="270.0" y2="316" stroke="rgba(17,19,23,0.09)"/>
+<text x="270.0" y="332" text-anchor="middle">2</text>
+<line x1="370.0" y1="14" x2="370.0" y2="316" stroke="rgba(17,19,23,0.09)"/>
+<text x="370.0" y="332" text-anchor="middle">4</text>
+<line x1="470.0" y1="14" x2="470.0" y2="316" stroke="rgba(17,19,23,0.09)"/>
+<text x="470.0" y="332" text-anchor="middle">6</text>
+<line x1="570.0" y1="14" x2="570.0" y2="316" stroke="rgba(17,19,23,0.09)"/>
+<text x="570.0" y="332" text-anchor="middle">8</text>
 <text x="395" y="348" text-anchor="middle">information value, training months</text>
 <text x="162" y="35" text-anchor="end" fill="#111317" font-size="11">cat_amt</text>
-<g class="pt"><title>cat_amt: information value 6.710</title><rect x="170" y="24" width="431.3" height="14" rx="3" fill="#f37021"/><text x="609.3" y="35" fill="#111317" font-size="11">6.71, the cross bin</text></g>
+<g class="pt"><title>cat_amt: information value 8.290</title><rect x="170" y="24" width="414.5" height="14" rx="3" fill="#f37021"/><text x="592.5" y="35" fill="#111317" font-size="11">8.29</text></g>
 <text x="162" y="57" text-anchor="end" fill="#111317" font-size="11">amt</text>
-<g class="pt"><title>amt: information value 4.329</title><rect x="170" y="46" width="278.3" height="14" rx="3" fill="#f37021"/><text x="456.3" y="57" fill="#111317" font-size="11">4.33</text></g>
+<g class="pt"><title>amt: information value 4.022</title><rect x="170" y="46" width="201.1" height="14" rx="3" fill="#f37021"/><text x="379.1" y="57" fill="#111317" font-size="11">4.02</text></g>
 <text x="162" y="79" text-anchor="end" fill="#111317" font-size="11">amt_vs_prior_mean</text>
-<g class="pt"><title>amt_vs_prior_mean: information value 3.579</title><rect x="170" y="68" width="230.1" height="14" rx="3" fill="#f37021"/><text x="408.1" y="79" fill="#111317" font-size="11">3.58</text></g>
+<g class="pt"><title>amt_vs_prior_mean: information value 3.320</title><rect x="170" y="68" width="166.0" height="14" rx="3" fill="#f37021"/><text x="344.0" y="79" fill="#111317" font-size="11">3.32</text></g>
 <text x="162" y="101" text-anchor="end" fill="#111317" font-size="11">hour</text>
-<g class="pt"><title>hour: information value 1.852</title><rect x="170" y="90" width="119.0" height="14" rx="3" fill="#f37021"/><text x="297.0" y="101" fill="#111317" font-size="11">1.85</text></g>
+<g class="pt"><title>hour: information value 1.855</title><rect x="170" y="90" width="92.8" height="14" rx="3" fill="#f37021"/><text x="270.8" y="101" fill="#111317" font-size="11">1.86</text></g>
 <text x="162" y="123" text-anchor="end" fill="#111317" font-size="11">category</text>
-<g class="pt"><title>category: information value 0.575</title><rect x="170" y="112" width="36.9" height="14" rx="3" fill="#f37021"/><text x="214.9" y="123" fill="#111317" font-size="11">0.57</text></g>
+<g class="pt"><title>category: information value 0.572</title><rect x="170" y="112" width="28.6" height="14" rx="3" fill="#f37021"/><text x="206.6" y="123" fill="#111317" font-size="11">0.57</text></g>
 <text x="162" y="145" text-anchor="end" fill="#111317" font-size="11">log_secs_since_prev</text>
-<g class="pt"><title>log_secs_since_prev: information value 0.481</title><rect x="170" y="134" width="30.9" height="14" rx="3" fill="#f37021"/><text x="208.9" y="145" fill="#111317" font-size="11">0.48</text></g>
+<g class="pt"><title>log_secs_since_prev: information value 0.479</title><rect x="170" y="134" width="23.9" height="14" rx="3" fill="#f37021"/><text x="201.9" y="145" fill="#111317" font-size="11">0.48</text></g>
 <text x="162" y="167" text-anchor="end" fill="#111317" font-size="11">n_prev_1h</text>
-<g class="pt"><title>n_prev_1h: information value 0.365</title><rect x="170" y="156" width="23.5" height="14" rx="3" fill="#f37021"/><text x="201.5" y="167" fill="#111317" font-size="11">0.37</text></g>
+<g class="pt"><title>n_prev_1h: information value 0.363</title><rect x="170" y="156" width="18.1" height="14" rx="3" fill="#f37021"/><text x="196.1" y="167" fill="#111317" font-size="11">0.36</text></g>
 <text x="162" y="189" text-anchor="end" fill="#6b7077" font-size="11">n_prev_24h</text>
-<g class="pt"><title>n_prev_24h: information value 0.140</title><rect x="170" y="178" width="9.0" height="14" rx="3" fill="rgba(17,19,23,0.18)"/><text x="187.0" y="189" fill="#111317" font-size="11">0.14</text></g>
+<g class="pt"><title>n_prev_24h: information value 0.137</title><rect x="170" y="178" width="6.9" height="14" rx="3" fill="rgba(17,19,23,0.18)"/><text x="184.9" y="189" fill="#111317" font-size="11">0.14</text></g>
 <text x="162" y="211" text-anchor="end" fill="#6b7077" font-size="11">age</text>
-<g class="pt"><title>age: information value 0.039</title><rect x="170" y="200" width="2.5" height="14" rx="3" fill="rgba(17,19,23,0.18)"/><text x="180.5" y="211" fill="#111317" font-size="11">0.04</text></g>
+<g class="pt"><title>age: information value 0.039</title><rect x="170" y="200" width="2.0" height="14" rx="3" fill="rgba(17,19,23,0.18)"/><text x="180.0" y="211" fill="#111317" font-size="11">0.04</text></g>
 <text x="162" y="233" text-anchor="end" fill="#6b7077" font-size="11">month</text>
-<g class="pt"><title>month: information value 0.038</title><rect x="170" y="222" width="2.4" height="14" rx="3" fill="rgba(17,19,23,0.18)"/><text x="180.4" y="233" fill="#111317" font-size="11">0.04</text></g>
+<g class="pt"><title>month: information value 0.039</title><rect x="170" y="222" width="2.0" height="14" rx="3" fill="rgba(17,19,23,0.18)"/><text x="180.0" y="233" fill="#111317" font-size="11">0.04</text></g>
 <text x="162" y="255" text-anchor="end" fill="#6b7077" font-size="11">dow</text>
-<g class="pt"><title>dow: information value 0.022</title><rect x="170" y="244" width="1.4" height="14" rx="3" fill="rgba(17,19,23,0.18)"/><text x="179.4" y="255" fill="#111317" font-size="11">0.02</text></g>
+<g class="pt"><title>dow: information value 0.022</title><rect x="170" y="244" width="1.1" height="14" rx="3" fill="rgba(17,19,23,0.18)"/><text x="179.1" y="255" fill="#111317" font-size="11">0.02</text></g>
 <text x="162" y="277" text-anchor="end" fill="#6b7077" font-size="11">city_pop</text>
-<g class="pt"><title>city_pop: information value 0.007</title><rect x="170" y="266" width="1.0" height="14" rx="3" fill="rgba(17,19,23,0.18)"/><text x="178.4" y="277" fill="#111317" font-size="11">0.01</text></g>
+<g class="pt"><title>city_pop: information value 0.006</title><rect x="170" y="266" width="1.0" height="14" rx="3" fill="rgba(17,19,23,0.18)"/><text x="178.3" y="277" fill="#111317" font-size="11">0.01</text></g>
 <text x="162" y="299" text-anchor="end" fill="#6b7077" font-size="11">home_merchant_km</text>
 <g class="pt"><title>home_merchant_km: information value 0.001</title><rect x="170" y="288" width="1.0" height="14" rx="3" fill="rgba(17,19,23,0.18)"/><text x="178.1" y="299" fill="#111317" font-size="11">0.00</text></g>
 </svg></div>
         
-        <figcaption>Information value per feature from the scorecard's bins. The category-by-amount cross bin carries more than either parent, which is why the scorecard only became competitive once it had an interaction.</figcaption>
+        <figcaption>Information value per feature from the scorecard fit on the full training frame.</figcaption>
         <details>
           <summary>Show the numbers</summary>
-          <div class="tbl"><table><thead><tr><th>feature</th><th>information value</th></tr></thead><tbody><tr><td>cat_amt</td><td>6.710</td></tr><tr><td>amt</td><td>4.329</td></tr><tr><td>amt_vs_prior_mean</td><td>3.579</td></tr><tr><td>hour</td><td>1.852</td></tr><tr><td>category</td><td>0.575</td></tr><tr><td>log_secs_since_prev</td><td>0.481</td></tr><tr><td>n_prev_1h</td><td>0.365</td></tr><tr><td>n_prev_24h</td><td>0.140</td></tr><tr><td>age</td><td>0.039</td></tr><tr><td>month</td><td>0.038</td></tr><tr><td>dow</td><td>0.022</td></tr><tr><td>city_pop</td><td>0.007</td></tr><tr><td>home_merchant_km</td><td>0.001</td></tr></tbody></table></div>
+          <div class="tbl"><table><thead><tr><th>feature</th><th>information value</th></tr></thead><tbody><tr><td>cat_amt</td><td>8.290</td></tr><tr><td>amt</td><td>4.022</td></tr><tr><td>amt_vs_prior_mean</td><td>3.320</td></tr><tr><td>hour</td><td>1.855</td></tr><tr><td>category</td><td>0.572</td></tr><tr><td>log_secs_since_prev</td><td>0.479</td></tr><tr><td>n_prev_1h</td><td>0.363</td></tr><tr><td>n_prev_24h</td><td>0.137</td></tr><tr><td>age</td><td>0.039</td></tr><tr><td>month</td><td>0.039</td></tr><tr><td>dow</td><td>0.022</td></tr><tr><td>city_pop</td><td>0.006</td></tr><tr><td>home_merchant_km</td><td>0.001</td></tr></tbody></table></div>
         </details>
       </figure>
-      <div class="case-prose reveal">
-        <p>The fraud in this data is a $300 to $1,200 purchase in a handful of categories, mostly between 22:00 and 04:00. Amount alone does not find it, because the same $500 is normal in travel and alarming in grocery. A main-effects scorecard cannot express that and scores 0.13 on average precision; one cross bin lifts it to 0.28; the tree model learns the interaction on its own and scores 0.80. That gap is what I took from the exercise.</p>
-      </div>
       <p class="reveal"><a class="case-cta" href="/projects/micro/binning-explorer/">Open the binning explorer <span class="arr">→</span></a> <span class="case-cta-note">See the bins behind the scorecard and move the splits yourself.</span></p>
 
     </div>
@@ -408,70 +401,46 @@
         <div class="l"><span class="idx">06</span><h2>Night and day</h2></div>
       </div>
       <figure class="case-figure reveal">
-        <div class="viz"><svg viewBox="0 0 700 300" role="img" aria-labelledby="slcTitle slcDesc">
+        <div class="viz"><svg viewBox="0 0 700 330" role="img" aria-labelledby="slcTitle slcDesc">
 <title id="slcTitle">Night against day: precision and recall per model at the same December thresholds</title>
-<desc id="slcDesc">Two slope panels. Every model falls from night to day. Gradient boosting recall goes from 88 to 48 percent and precision from 56 to 37 percent; the scorecard raises no daytime alerts; logistic regression precision falls to 4 percent in the day. Night has 164 fraud cases and day 31.</desc>
-<text x="80" y="22" fill="#111317">precision</text>
-<line x1="80" y1="230.0" x2="310" y2="230.0" stroke="rgba(17,19,23,0.09)"/>
-<text x="72" y="234.0" text-anchor="end">0%</text>
-<line x1="80" y1="183.5" x2="310" y2="183.5" stroke="rgba(17,19,23,0.09)"/>
-<text x="72" y="187.5" text-anchor="end">25%</text>
-<line x1="80" y1="137.0" x2="310" y2="137.0" stroke="rgba(17,19,23,0.09)"/>
-<text x="72" y="141.0" text-anchor="end">50%</text>
-<line x1="80" y1="90.5" x2="310" y2="90.5" stroke="rgba(17,19,23,0.09)"/>
-<text x="72" y="94.5" text-anchor="end">75%</text>
-<line x1="80" y1="44.0" x2="310" y2="44.0" stroke="rgba(17,19,23,0.09)"/>
-<text x="72" y="48.0" text-anchor="end">100%</text>
-<text x="110" y="248" text-anchor="middle">night</text><text x="280" y="248" text-anchor="middle">day</text>
-<text x="110" y="264" text-anchor="middle" font-size="10">164 fraud</text><text x="280" y="264" text-anchor="middle" font-size="10">31 fraud</text>
-<line x1="110" y1="125.5" x2="280" y2="162.0" stroke="#f37021" stroke-width="2" stroke-linecap="round"/>
-<g class="pt"><title>Gradient boosting, night: precision 0.56</title><circle cx="110" cy="125.5" r="5" fill="#f37021" stroke="#ffffff" stroke-width="2"/></g>
-<g class="pt"><title>Gradient boosting, day: precision 0.37</title><circle cx="280" cy="162.0" r="5" fill="#f37021" stroke="#ffffff" stroke-width="2"/></g>
-<text x="100" y="129.5" text-anchor="end" fill="#111317" font-size="11">56%</text>
-<text x="290" y="166.0" fill="#111317" font-size="11">37%</text>
-<line x1="110" y1="159.0" x2="280" y2="230.0" stroke="#2a78d6" stroke-width="2" stroke-linecap="round"/>
-<g class="pt"><title>WOE scorecard, night: precision 0.38</title><circle cx="110" cy="159.0" r="5" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/></g>
-<g class="pt"><title>WOE scorecard, day: precision 0.00</title><circle cx="280" cy="230.0" r="5" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/></g>
-<text x="100" y="154.5" text-anchor="end" fill="#111317" font-size="11">38%</text>
-<text x="290" y="234.0" fill="#111317" font-size="11">0%</text>
-<line x1="110" y1="163.5" x2="280" y2="223.4" stroke="#1baf7a" stroke-width="2" stroke-linecap="round"/>
-<g class="pt"><title>Logistic regression, night: precision 0.36</title><circle cx="110" cy="163.5" r="5" fill="#1baf7a" stroke="#ffffff" stroke-width="2"/></g>
-<g class="pt"><title>Logistic regression, day: precision 0.04</title><circle cx="280" cy="223.4" r="5" fill="#1baf7a" stroke="#ffffff" stroke-width="2"/></g>
-<text x="100" y="167.5" text-anchor="end" fill="#111317" font-size="11">36%</text>
-<text x="290" y="221.0" fill="#111317" font-size="11">4%</text>
-<text x="400" y="22" fill="#111317">recall</text>
-<line x1="400" y1="230.0" x2="630" y2="230.0" stroke="rgba(17,19,23,0.09)"/>
-<line x1="400" y1="183.5" x2="630" y2="183.5" stroke="rgba(17,19,23,0.09)"/>
-<line x1="400" y1="137.0" x2="630" y2="137.0" stroke="rgba(17,19,23,0.09)"/>
-<line x1="400" y1="90.5" x2="630" y2="90.5" stroke="rgba(17,19,23,0.09)"/>
-<line x1="400" y1="44.0" x2="630" y2="44.0" stroke="rgba(17,19,23,0.09)"/>
-<text x="430" y="248" text-anchor="middle">night</text><text x="600" y="248" text-anchor="middle">day</text>
-<text x="430" y="264" text-anchor="middle" font-size="10">164 fraud</text><text x="600" y="264" text-anchor="middle" font-size="10">31 fraud</text>
-<line x1="430" y1="65.5" x2="600" y2="140.0" stroke="#f37021" stroke-width="2" stroke-linecap="round"/>
-<g class="pt"><title>Gradient boosting, night: recall 0.88</title><circle cx="430" cy="65.5" r="5" fill="#f37021" stroke="#ffffff" stroke-width="2"/></g>
-<g class="pt"><title>Gradient boosting, day: recall 0.48</title><circle cx="600" cy="140.0" r="5" fill="#f37021" stroke="#ffffff" stroke-width="2"/></g>
-<text x="420" y="69.5" text-anchor="end" fill="#111317" font-size="11">88%</text>
-<text x="610" y="144.0" fill="#111317" font-size="11">48%</text>
-<line x1="430" y1="164.2" x2="600" y2="230.0" stroke="#2a78d6" stroke-width="2" stroke-linecap="round"/>
-<g class="pt"><title>WOE scorecard, night: recall 0.35</title><circle cx="430" cy="164.2" r="5" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/></g>
-<g class="pt"><title>WOE scorecard, day: recall 0.00</title><circle cx="600" cy="230.0" r="5" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/></g>
-<text x="420" y="168.2" text-anchor="end" fill="#111317" font-size="11">35%</text>
-<text x="610" y="234.0" fill="#111317" font-size="11">0%</text>
-<line x1="430" y1="134.7" x2="600" y2="170.0" stroke="#1baf7a" stroke-width="2" stroke-linecap="round"/>
-<g class="pt"><title>Logistic regression, night: recall 0.51</title><circle cx="430" cy="134.7" r="5" fill="#1baf7a" stroke="#ffffff" stroke-width="2"/></g>
-<g class="pt"><title>Logistic regression, day: recall 0.32</title><circle cx="600" cy="170.0" r="5" fill="#1baf7a" stroke="#ffffff" stroke-width="2"/></g>
-<text x="420" y="138.7" text-anchor="end" fill="#111317" font-size="11">51%</text>
-<text x="610" y="174.0" fill="#111317" font-size="11">32%</text>
+<desc id="slcDesc">Grouped columns, night and day, three models each with a precision column and a lighter recall column. Gradient boosting holds 90 percent recall at night and 55 in the day; the scorecard falls from 66 to 13 percent recall; logistic regression precision falls to 3 percent in the day. Night has 164 fraud cases and day 31.</desc>
+<line x1="60" y1="250.0" x2="680" y2="250.0" stroke="rgba(17,19,23,0.09)"/>
+<text x="52" y="254.0" text-anchor="end">0%</text>
+<line x1="60" y1="197.5" x2="680" y2="197.5" stroke="rgba(17,19,23,0.09)"/>
+<text x="52" y="201.5" text-anchor="end">25%</text>
+<line x1="60" y1="145.0" x2="680" y2="145.0" stroke="rgba(17,19,23,0.09)"/>
+<text x="52" y="149.0" text-anchor="end">50%</text>
+<line x1="60" y1="92.5" x2="680" y2="92.5" stroke="rgba(17,19,23,0.09)"/>
+<text x="52" y="96.5" text-anchor="end">75%</text>
+<line x1="60" y1="40.0" x2="680" y2="40.0" stroke="rgba(17,19,23,0.09)"/>
+<text x="52" y="44.0" text-anchor="end">100%</text>
+<text x="215" y="270" text-anchor="middle" fill="#111317">night 22:00 to 03:59</text>
+<text x="215" y="288" text-anchor="middle" font-size="11">164 fraud cases</text>
+<g class="pt"><title>Gradient boosting, night 22:00 to 03:59: precision 0.58 (254 alerts)</title><rect x="106.0" y="128.5" width="30" height="121.5" rx="3" fill="#f37021" fill-opacity="1.0"/><text x="121.0" y="123.5" text-anchor="middle" fill="#111317" font-size="10">58%</text></g>
+<g class="pt"><title>Gradient boosting, night 22:00 to 03:59: recall 0.90 (254 alerts)</title><rect x="138.0" y="61.8" width="30" height="188.2" rx="3" fill="#f37021" fill-opacity="0.45"/><text x="153.0" y="56.8" text-anchor="middle" fill="#111317" font-size="10">90%</text></g>
+<g class="pt"><title>WOE scorecard, night 22:00 to 03:59: precision 0.50 (219 alerts)</title><rect x="184.0" y="145.5" width="30" height="104.5" rx="3" fill="#2a78d6" fill-opacity="1.0"/><text x="199.0" y="140.5" text-anchor="middle" fill="#111317" font-size="10">50%</text></g>
+<g class="pt"><title>WOE scorecard, night 22:00 to 03:59: recall 0.66 (219 alerts)</title><rect x="216.0" y="110.4" width="30" height="139.6" rx="3" fill="#2a78d6" fill-opacity="0.45"/><text x="231.0" y="105.4" text-anchor="middle" fill="#111317" font-size="10">66%</text></g>
+<g class="pt"><title>Logistic regression, night 22:00 to 03:59: precision 0.33 (284 alerts)</title><rect x="262.0" y="179.8" width="30" height="70.2" rx="3" fill="#1baf7a" fill-opacity="1.0"/><text x="277.0" y="174.8" text-anchor="middle" fill="#111317" font-size="10">33%</text></g>
+<g class="pt"><title>Logistic regression, night 22:00 to 03:59: recall 0.58 (284 alerts)</title><rect x="294.0" y="128.4" width="30" height="121.6" rx="3" fill="#1baf7a" fill-opacity="0.45"/><text x="309.0" y="123.4" text-anchor="middle" fill="#111317" font-size="10">58%</text></g>
+<text x="525" y="270" text-anchor="middle" fill="#111317">day 04:00 to 21:59</text>
+<text x="525" y="288" text-anchor="middle" font-size="11">31 fraud cases</text>
+<g class="pt"><title>Gradient boosting, day 04:00 to 21:59: precision 0.49 (35 alerts)</title><rect x="416.0" y="148.0" width="30" height="102.0" rx="3" fill="#f37021" fill-opacity="1.0"/><text x="431.0" y="143.0" text-anchor="middle" fill="#111317" font-size="10">49%</text></g>
+<g class="pt"><title>Gradient boosting, day 04:00 to 21:59: recall 0.55 (35 alerts)</title><rect x="448.0" y="134.8" width="30" height="115.2" rx="3" fill="#f37021" fill-opacity="0.45"/><text x="463.0" y="129.8" text-anchor="middle" fill="#111317" font-size="10">55%</text></g>
+<g class="pt"><title>WOE scorecard, day 04:00 to 21:59: precision 0.44 (9 alerts)</title><rect x="494.0" y="156.7" width="30" height="93.3" rx="3" fill="#2a78d6" fill-opacity="1.0"/><text x="509.0" y="151.7" text-anchor="middle" fill="#111317" font-size="10">44%</text></g>
+<g class="pt"><title>WOE scorecard, day 04:00 to 21:59: recall 0.13 (9 alerts)</title><rect x="526.0" y="222.9" width="30" height="27.1" rx="3" fill="#2a78d6" fill-opacity="0.45"/><text x="541.0" y="217.9" text-anchor="middle" fill="#111317" font-size="10">13%</text></g>
+<g class="pt"><title>Logistic regression, day 04:00 to 21:59: precision 0.03 (316 alerts)</title><rect x="572.0" y="243.4" width="30" height="6.6" rx="3" fill="#1baf7a" fill-opacity="1.0"/><text x="587.0" y="238.4" text-anchor="middle" fill="#111317" font-size="10">3%</text></g>
+<g class="pt"><title>Logistic regression, day 04:00 to 21:59: recall 0.32 (316 alerts)</title><rect x="604.0" y="182.3" width="30" height="67.7" rx="3" fill="#1baf7a" fill-opacity="0.45"/><text x="619.0" y="177.3" text-anchor="middle" fill="#111317" font-size="10">32%</text></g>
+<text x="370" y="324" text-anchor="middle">solid column precision, light column recall; December 2020, same thresholds</text>
 </svg></div>
         <div class="viz-legend"><span><i style="background:#f37021"></i>Gradient boosting</span><span><i style="background:#2a78d6"></i>WOE scorecard</span><span><i style="background:#1baf7a"></i>Logistic regression</span></div>
-        <figcaption>The same December thresholds split by hour. Daytime fraud is 31 cases of 195, and every model does worse on it.</figcaption>
+        <figcaption>The same December thresholds split by hour.</figcaption>
         <details>
           <summary>Show the numbers</summary>
-          <div class="tbl"><table><thead><tr><th>model</th><th>night precision</th><th>night recall</th><th>night alerts</th><th>day precision</th><th>day recall</th><th>day alerts</th></tr></thead><tbody><tr><td>Gradient boosting</td><td>0.56</td><td>0.88</td><td>258</td><td>0.37</td><td>0.48</td><td>41</td></tr><tr><td>WOE scorecard</td><td>0.38</td><td>0.35</td><td>152</td><td>0.00</td><td>0.00</td><td>0</td></tr><tr><td>Logistic regression</td><td>0.36</td><td>0.51</td><td>235</td><td>0.04</td><td>0.32</td><td>281</td></tr></tbody></table></div>
+          <div class="tbl"><table><thead><tr><th>model</th><th>night precision</th><th>night recall</th><th>night alerts</th><th>day precision</th><th>day recall</th><th>day alerts</th></tr></thead><tbody><tr><td>Gradient boosting</td><td>0.58</td><td>0.90</td><td>254</td><td>0.49</td><td>0.55</td><td>35</td></tr><tr><td>WOE scorecard</td><td>0.50</td><td>0.66</td><td>219</td><td>0.44</td><td>0.13</td><td>9</td></tr><tr><td>Logistic regression</td><td>0.33</td><td>0.58</td><td>284</td><td>0.03</td><td>0.32</td><td>316</td></tr></tbody></table></div>
         </details>
       </figure>
       <div class="case-prose reveal">
-        <p>Gradient boosting holds 88 percent recall at night and 48 percent in the day. The scorecard raises no daytime alerts at all. A model that only works at night is a model a fraudster learns to beat by waiting until morning, so I'd report the daytime slice to the bank separately.</p>
+        <p>On the training rows 85 percent of the fraud sits on the 23 percent of volume between 22:00 and 04:00, a 1.7 percent rate against 0.09 percent by day. Gradient boosting holds 90 percent recall at night and 55 percent in the day on the same threshold. The scorecard raises 9 daytime alerts in the whole month. A model that only works at night is a model a fraudster learns to beat by waiting until morning, so I'd report the daytime slice to the bank separately.</p>
       </div>
 
     </div>
@@ -483,13 +452,8 @@
         <div class="l"><span class="idx">07</span><h2>What I would test next</h2></div>
       </div>
       <div class="case-prose reveal">
-        <ul>
-<li>Hold the threshold rule and re-fit monthly on a rolling window, to see whether the December precision drop is seasonal volume or drift in the fraud mix.</li>
-<li>Give the scorecard the hour-by-category and amount-by-hour cross bins and check whether an explainable model can close the gap to the tree.</li>
-<li>Replace the 70 percent precision rule with an alert budget per analyst per day and read recall off that, which is how fraud operations teams I have worked with set thresholds.</li>
-<li>Daytime fraud as its own evaluation slice, with its own threshold if the cost of a missed daytime case justifies more alerts.</li>
-</ul>
-        <p class="case-note">Method notes: scikit-learn 1.9, optbinning 1.0, one run of 37 seconds on a laptop. Thresholds and bins come from the training and validation months only. Confidence intervals resample cardholders, 500 draws.</p>
+        <ul><li>Hold the threshold rule and re-fit monthly on a rolling window, to see whether the December precision drop is seasonal volume or drift in the fraud mix.</li><li>Give the scorecard the hour-by-category and amount-by-hour cross bins and check whether an explainable model can close the rest of the gap to the tree.</li><li>Replace the 70 percent precision rule with an alert budget per analyst per day and read recall off that, which is how the fraud operations teams I have worked with set thresholds.</li><li>Daytime fraud as its own evaluation slice, with its own threshold if the cost of a missed daytime case justifies more alerts.</li></ul>
+        <p class="case-note">Method notes: scikit-learn 1.9, optbinning 1.0, one run of 115 seconds on a laptop. Thresholds and bins come from the training and validation months only. Intervals resample cardholders, 1000 draws, model and threshold fixed. The oracle recall at 70 percent precision in the tables uses December labels and is an upper bound, not an operating result.</p>
       </div>
 
     </div>

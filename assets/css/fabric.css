@@ -351,6 +351,7 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; font-weight: 700; lette
 .case-prose ul { padding-left: 1.2rem; margin: 0 0 1.15rem; color: var(--ink-soft); }
 .case-prose li { margin: 0 0 0.5rem; }
 .case-prose .case-note { font-size: 0.86rem; color: var(--muted); }
+.case-prose code { font-family: var(--mono); font-size: 0.78em; background: var(--bg-2); padding: 0.1em 0.35em; border-radius: 4px; }
 .case-table { margin: 1.2rem 0; max-width: 760px; overflow-x: auto; }
 .case-table table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; font-size: 0.92rem; }
 .case-table th, .case-table td { padding: 0.55rem 1rem 0.55rem 0; text-align: right; border-bottom: 1px solid var(--line); color: var(--ink-soft); }
