@@ -280,8 +280,12 @@
     var revs = document.querySelectorAll('.reveal');
     if ('IntersectionObserver' in window) {
       var io = new IntersectionObserver(function (entries) {
-        entries.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } });
-      }, { threshold: 0.12, rootMargin: '0px 0px -7% 0px' });
+        entries.forEach(function (en) {
+          // a block taller than the viewport can never show 12% at once, so any intersection counts for it
+          var tall = en.boundingClientRect.height > window.innerHeight * 0.6;
+          if (en.isIntersecting && (tall || en.intersectionRatio >= 0.12)) { en.target.classList.add('in'); io.unobserve(en.target); }
+        });
+      }, { threshold: [0, 0.12], rootMargin: '0px 0px -7% 0px' });
       revs.forEach(function (r) { io.observe(r); });
     } else {
       revs.forEach(function (r) { r.classList.add('in'); });
