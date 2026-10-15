@@ -344,6 +344,38 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; font-weight: 700; lette
 .decision .d-l { display: block; font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted-2); }
 @media (max-width: 1000px) { .decision-board { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 520px) { .decision-board { grid-template-columns: 1fr; } }
+.case-cta { display: inline-flex; align-items: center; gap: 0.6rem; font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink); background: var(--surface); border: 1px solid var(--line-2); border-radius: 100px; padding: 0.7rem 1.1rem; transition: border-color 0.2s ease, transform 0.2s ease; }
+.case-cta:hover { border-color: var(--accent); transform: translateY(-2px); }
+.case-cta .arr { color: var(--accent); }
+.case-cta-note { display: inline-block; margin-left: 0.6rem; font-size: 0.9rem; color: var(--muted); }
+.case-prose ul { padding-left: 1.2rem; margin: 0 0 1.15rem; color: var(--ink-soft); }
+.case-prose li { margin: 0 0 0.5rem; }
+.case-prose .case-note { font-size: 0.86rem; color: var(--muted); }
+.case-table { margin: 1.2rem 0; max-width: 760px; overflow-x: auto; }
+.case-table table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; font-size: 0.92rem; }
+.case-table th, .case-table td { padding: 0.55rem 1rem 0.55rem 0; text-align: right; border-bottom: 1px solid var(--line); color: var(--ink-soft); }
+.case-table th { font-family: var(--mono); font-size: 0.64rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-weight: 400; }
+.case-table th:first-child, .case-table td:first-child { text-align: left; }
+.explorer { margin-top: 1.6rem; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: clamp(1rem, 2.4vw, 1.6rem); min-width: 0; }
+.explorer .row { display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center; margin: 0 0 1rem; font-size: 0.9rem; color: var(--ink-soft); }
+.explorer select, .explorer button { font: inherit; font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.06em; padding: 0.5rem 0.85rem; border: 1px solid var(--line-2); border-radius: 100px; background: var(--surface); color: var(--ink); cursor: pointer; }
+.explorer select { text-transform: none; }
+.explorer button:hover { border-color: var(--accent); }
+.explorer button.pri { background: var(--accent); color: #fff; border-color: var(--accent); }
+.explorer .mut { color: var(--muted); font-size: 0.82rem; }
+.explorer .kpi { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.6rem; margin-bottom: 1rem; }
+.explorer .kpi div { border: 1px solid var(--line); border-radius: 10px; padding: 0.7rem 0.9rem; min-width: 0; }
+.explorer .kpi b { display: block; font-family: var(--display); font-size: 1.5rem; font-weight: 600; letter-spacing: -0.03em; line-height: 1.1; }
+.explorer .kpi span { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted-2); }
+.explorer .chartwrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--line); border-radius: 10px; }
+.explorer #chart { width: 100%; min-width: 720px; height: auto; display: block; touch-action: none; font-family: var(--mono); }
+.explorer .tbl { overflow-x: auto; margin-top: 0.8rem; }
+.explorer table { border-collapse: collapse; width: 100%; font-size: 0.86rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.explorer th, .explorer td { border-bottom: 1px solid var(--line); padding: 0.4rem 0.6rem; text-align: right; color: var(--ink-soft); }
+.explorer th:first-child, .explorer td:first-child { text-align: left; }
+.explorer th { font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-weight: 400; }
+.explorer .warn { color: var(--accent); }
+@media (max-width: 700px) { .explorer .kpi { grid-template-columns: repeat(2, 1fr); } }
 .case-findings { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1.2rem, 2.5vw, 2rem); margin-top: clamp(1.6rem, 3vw, 2.4rem); }
 .case-findings > div { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: clamp(1.3rem, 2.4vw, 1.9rem); }
 .case-findings h3 { font-size: 1.12rem; font-weight: 600; letter-spacing: -0.025em; line-height: 1.1; margin-bottom: 0.75rem; }
