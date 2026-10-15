@@ -2,6 +2,7 @@
 
 ## Now
 
+- 🧑 Sign in to Cloudflare in the Chrome tab (Analytics & Logs, Web Analytics). Then 🤖 adds jonathanpoeder.com as a site ("I don't use Cloudflare" option, no DNS change), runs `python3 tools/add_analytics.py <token>`, and pushes. Cookieless, no consent banner; traffic shows in the Cloudflare dashboard and the i8l portal hosts panel.
 - 🤖 Add each JHU EN.705.603 case study to Projects, Johns Hopkins case studies, once it is graded: IronClad (due 2026-10-25), TextWave, MovieMate, SecureBank final project. Pattern: `projects/case-studies/techtrack/`. Own findings only; no course materials, code, or links to private repos.
 
 ## Next
