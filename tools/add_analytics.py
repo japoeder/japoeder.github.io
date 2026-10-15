@@ -13,7 +13,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-TAG = ('<script defer src="https://static.cloudflareinsights.com/beacon.min.js" '
+TAG = ('<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" '
        'data-cf-beacon=\'{"token": "%s"}\'></script>\n')
 EXISTING = re.compile(r'<script[^>]*static\.cloudflareinsights\.com[^>]*></script>\n')
 
