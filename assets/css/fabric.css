@@ -288,10 +288,14 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; font-weight: 700; lette
 .page-hero .ph-sub { max-width: 28ch; margin-top: clamp(3rem, 9vw, 7rem); font-family: var(--display); font-weight: 500; font-size: clamp(1.3rem, 2.6vw, 2.1rem); line-height: 1.12; letter-spacing: -0.03em; }
 
 /* ------------------- case studies ---------------------- */
-.case-card .case-points { margin: 0.2rem 0 0.9rem 1.1rem; padding: 0; color: var(--muted); font-size: 0.92rem; line-height: 1.5; }
+.case-card .case-points { margin: 0.2rem 0 0.9rem 1.1rem; padding: 0; color: var(--muted); font-size: 0.9rem; line-height: 1.5; }
 .case-card .case-points li { margin: 0 0 0.35rem; }
-.case-card .case-meta { font-family: "Space Mono", monospace; font-size: 0.78rem; letter-spacing: 0.02em; color: var(--muted); margin: 0 0 0.6rem; }
-@media (min-width: 900px) { .work-grid .case-card { grid-column: 1 / -1; display: grid; grid-template-columns: 2fr 3fr; } .case-card .work-thumb { height: 100%; } .case-card .work-thumb img { height: 100%; object-fit: cover; } }
+.case-card .case-grade { font-family: var(--mono); font-size: 0.78rem; letter-spacing: 0.02em; color: var(--muted); margin: 0 0 0.6rem; }
+.case-card .work-body { min-width: 0; }
+.case-card .work-body p { margin-bottom: 1rem; }
+.case-card .case-points { font-size: 0.9rem; overflow-wrap: anywhere; }
+.case-spark { width: 100%; height: auto; display: block; margin: 0 0 1rem; }
+.case-spark text { font-family: var(--mono); font-size: 7.5px; fill: var(--muted); }
 .page-hero .ph-eyebrow { color: var(--accent); margin-bottom: 1.4rem; }
 .case-meta { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--line); border-left: 1px solid var(--line); }
 .case-meta > div { padding: clamp(1.1rem, 2.2vw, 1.6rem); border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
