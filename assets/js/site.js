@@ -142,11 +142,41 @@
     else raf = requestAnimationFrame(frame);
   }
 
-  /* ---------------------- flowing line streams (portfolio) ---------------------- */
+  /* ---------------------- flowing particle streams (portfolio heroes) ---------------------- */
+  // The same wave paths the line streams followed, drawn as particles so the
+  // page heroes match the home page cloud: soft additive sprites, colour by
+  // height (indigo low, cyan high), drifting left to right with a little
+  // scatter around each lane. 2D canvas; a few thousand sprites per frame.
   function initLines(canvas) {
     var ctx = canvas.getContext('2d');
     var dpr = Math.min(window.devicePixelRatio || 1, 2);
     var W, H;
+    var mobile = window.matchMedia('(max-width: 760px)').matches;
+    var N = mobile ? 1100 : 3400;
+    var LANES = 26;
+
+    // one soft sprite per ramp stop, tinted once
+    var STOPS = ['#2c3fc5', '#1f81d2', '#38e6e0', '#4fd9b0'];
+    var sprites = STOPS.map(function (hex) {
+      var c = document.createElement('canvas'); c.width = c.height = 32;
+      var g = c.getContext('2d');
+      var r = g.createRadialGradient(16, 16, 0, 16, 16, 16);
+      r.addColorStop(0, hex); r.addColorStop(0.35, hex); r.addColorStop(1, 'rgba(0,0,0,0)');
+      g.fillStyle = r; g.fillRect(0, 0, 32, 32);
+      return c;
+    });
+
+    var px = new Float32Array(N), lane = new Float32Array(N), off = new Float32Array(N),
+        spd = new Float32Array(N), sz = new Float32Array(N), ph = new Float32Array(N);
+    for (var i = 0; i < N; i++) {
+      px[i] = Math.random();
+      lane[i] = Math.random();
+      off[i] = (Math.random() - 0.5);
+      spd[i] = 0.018 + Math.random() * 0.03;
+      sz[i] = 1.2 + Math.random() * 3.0;
+      ph[i] = Math.random() * 6.283;
+    }
+
     function resize() {
       var r = canvas.getBoundingClientRect();
       W = r.width; H = r.height;
@@ -156,27 +186,35 @@
     resize();
     window.addEventListener('resize', resize);
 
-    var LINES = 26;
+    var last = 0;
     function draw(t) {
-      ctx.clearRect(0, 0, W, H);
+      var dt = last ? Math.min(0.05, (t - last) / 1000) : 0.016; last = t;
       var time = t * 0.00022;
+      ctx.clearRect(0, 0, W, H);
+      ctx.globalCompositeOperation = 'lighter';
       var cx = W * 0.62, cy = H * 0.5;
-      for (var l = 0; l < LINES; l++) {
-        var k = l / LINES;
-        ctx.beginPath();
-        ctx.strokeStyle = 'rgba(56,230,224,' + (0.08 + k * 0.28) + ')';
-        ctx.lineWidth = 1;
-        for (var x = -50; x <= W + 50; x += 8) {
-          var nx = (x - cx) / (W * 0.5);
-          var amp = H * (0.10 + k * 0.16);
-          var y = cy
-            + Math.sin(nx * 2.2 + time + l * 0.18) * amp
-            + Math.sin(nx * 4.7 - time * 1.3 + l * 0.09) * amp * 0.4
-            + (k - 0.5) * H * 0.12;
-          if (x === -50) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-        }
-        ctx.stroke();
+      for (var i = 0; i < N; i++) {
+        px[i] += spd[i] * dt;
+        if (px[i] > 1.04) px[i] -= 1.08;
+        var x = px[i] * W;
+        var k = lane[i];
+        var nx = (x - cx) / (W * 0.5);
+        var amp = H * (0.10 + k * 0.16);
+        var y = cy
+          + Math.sin(nx * 2.2 + time + k * LANES * 0.18) * amp
+          + Math.sin(nx * 4.7 - time * 1.3 + k * LANES * 0.09) * amp * 0.4
+          + (k - 0.5) * H * 0.12
+          + off[i] * H * 0.025 * (1 + Math.sin(time * 3 + ph[i]));
+        // colour by height on the page: high is cyan, low is indigo
+        var h = 1 - Math.min(1, Math.max(0, y / H));
+        var si = h < 0.3 ? 0 : (h < 0.6 ? 1 : (h < 0.85 ? 2 : 3));
+        var a = 0.25 + 0.55 * (0.5 + 0.5 * Math.sin(time * 4 + ph[i]));
+        var d = sz[i] * (0.8 + 0.4 * h);
+        ctx.globalAlpha = a;
+        ctx.drawImage(sprites[si], x - d, y - d, d * 2, d * 2);
       }
+      ctx.globalAlpha = 1;
+      ctx.globalCompositeOperation = 'source-over';
       raf = requestAnimationFrame(draw);
     }
     var raf;
