@@ -34,7 +34,7 @@
     .brand .dot { color: var(--accent); }
     .links { display: flex; gap: 1.6rem; align-items: center; color: var(--muted); }
     .links a:hover { color: var(--ink); }
-    .links .cta { color: var(--ink); border: 1px solid var(--line); padding: .5rem .95rem; border-radius: 999px; font-family: var(--mono); font-size: .68rem; letter-spacing: .12em; text-transform: uppercase; }
+    .links .cta { white-space: nowrap; color: var(--ink); border: 1px solid var(--line); padding: .5rem .95rem; border-radius: 999px; font-family: var(--mono); font-size: .68rem; letter-spacing: .12em; text-transform: uppercase; }
     .links .cta .sq { display: inline-block; width: 7px; height: 7px; background: var(--accent); margin-right: .45rem; }
     @media (max-width: 760px) { .links a:not(.cta) { display: none; } }
 
@@ -51,7 +51,8 @@
       font-family: var(--mono); font-size: .66rem; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); line-height: 1.7; }
     @media (max-width: 760px) {
       .caption { display: none; }
-      .hero-title { bottom: 2rem; }
+      .hero-title { bottom: 5.5rem; font-size: 2.4rem; }
+      .panel { right: 1rem; left: 1rem; justify-content: center; }
     }
 
     .below { padding: clamp(3rem, 10vh, 7rem) var(--pad); max-width: 72ch; }
@@ -105,7 +106,7 @@
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="cloud.js?v=2"></script>
+  <script src="cloud.js?v=3"></script>
   <script>
     (function () {
       var PAL = { navy: ['#02040a', '#0b2859', '#2c3fc5', '#1f81d2', '#38e6e0', '#4fd9b0', '#ceecfa'],

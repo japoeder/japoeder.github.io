@@ -200,7 +200,7 @@
     var p = PALETTES[name] || PALETTES.navy;
     uniforms.uC0.value.set(p.stops[0]); uniforms.uC1.value.set(p.stops[1]);
     uniforms.uC2.value.set(p.stops[2]); uniforms.uC3.value.set(p.stops[3]);
-    uniforms.uAlpha.value = p.alpha; uniforms.uSize.value = p.size;
+    uniforms.uAlpha.value = p.alpha; uniforms.uSize.value = p.size * (isMobile ? 1.35 : 1);
     mat.blending = p.blend; mat.needsUpdate = true;
     bUniforms.uColor.value.set(p.stops[1]);
     bUniforms.uAlpha.value = name === 'light' ? 0.18 : 0.35;
@@ -215,7 +215,7 @@
     renderer.setSize(w, h, false);
     camera.aspect = w / h; camera.updateProjectionMatrix();
     // keep the shell about the same on-screen size at any aspect
-    camera.position.z = isMobile ? 7.0 : 6.0;
+    camera.position.z = isMobile ? 8.2 : 6.0;
     camera.position.x = isMobile ? 0 : -0.55;
     camera.lookAt(0, 0, 0);
   }
