@@ -61,7 +61,7 @@
       var theta = 2 * Math.PI * j / cols;
       targets.push(sy * Math.cos(theta), cy, sy * Math.sin(theta));
       // start: random point in a wide sphere, radius 1.5 to 4
-      var r = 1.5 + Math.random() * 2.5;
+      var r = opts.static ? 1.1 + Math.random() * 1.1 : 1.5 + Math.random() * 2.5;
       var u = Math.random() * 2 - 1, t2 = Math.random() * 2 * Math.PI;
       var s = Math.sqrt(1 - u * u);
       starts.push(r * s * Math.cos(t2), r * u, r * s * Math.sin(t2));
@@ -207,7 +207,7 @@
     var p = PALETTES[name] || PALETTES.navy;
     uniforms.uC0.value.set(p.stops[0]); uniforms.uC1.value.set(p.stops[1]);
     uniforms.uC2.value.set(p.stops[2]); uniforms.uC3.value.set(p.stops[3]);
-    uniforms.uAlpha.value = p.alpha; uniforms.uSize.value = p.size * (isMobile ? 1.35 : 1);
+    uniforms.uAlpha.value = p.alpha; uniforms.uSize.value = p.size * (isMobile ? 1.35 : 1) * Math.sqrt(300 / GRID);
     mat.blending = p.blend; mat.needsUpdate = true;
     bUniforms.uColor.value.set(p.stops[1]);
     bUniforms.uAlpha.value = opts.static ? 0 : (name === 'light' ? 0.18 : 0.35);
@@ -224,8 +224,11 @@
     renderer.setSize(w, h, false);
     camera.aspect = w / h; camera.updateProjectionMatrix();
     // keep the shell about the same on-screen size at any aspect
-    camera.position.z = isMobile ? 8.2 : (opts.distance || (opts.static ? 5.0 : 6.0));
+    camera.position.z = isMobile ? (opts.static ? 11 : 8.2) : (opts.distance || (opts.static ? 5.6 : 6.0));
     camera.position.x = isMobile ? 0 : (opts.offsetX || 0);
+    // shiftX moves the shell itself (lookAt keeps the origin centred, so camera x only changes the angle)
+    group.position.x = isMobile ? (opts.shiftX || 0) * 0.6 : (opts.shiftX || 0);
+    group.position.y = isMobile && opts.static ? -1.8 : 0;
     camera.lookAt(0, 0, 0);
   }
   window.addEventListener('resize', resize);
@@ -361,6 +364,7 @@
       try {
         initCloud(c, { offsetX: parseFloat(c.getAttribute('data-offset-x') || '0'),
                        grid: parseInt(c.getAttribute('data-grid') || '0', 10) || 0,
+                       shiftX: parseFloat(c.getAttribute('data-shift-x') || '0'),
                        static: c.hasAttribute('data-static') });
       } catch (e) {}
     });
