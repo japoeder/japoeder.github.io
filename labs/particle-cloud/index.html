@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en" data-palette="navy">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Particle cloud hero: review</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" type="image/svg+xml" href="/assets/img/favicon.svg?v=3">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Expanded:wght@600;700;800&family=Hanken+Grotesk:wght@300;400;500;600;700&family=Inter+Tight:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --display: 'Archivo Expanded', 'Inter Tight', sans-serif;
+      --body: 'Hanken Grotesk', 'Inter Tight', sans-serif;
+      --mono: 'Space Mono', monospace;
+      --nav-h: 72px;
+      --pad: clamp(1.25rem, 4vw, 3.5rem);
+    }
+    html[data-palette="navy"] {
+      --bg: #02040a; --haze: #0b2859; --ink: #ceecfa; --muted: #678db2; --accent: #38e6e0; --line: rgba(206,236,250,0.14);
+    }
+    html[data-palette="light"] {
+      --bg: #f7f7f9; --haze: #fde7d6; --ink: #111216; --muted: #6b6f7a; --accent: #f37021; --line: rgba(17,18,22,0.12);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body { background: var(--bg); color: var(--ink); font-family: var(--body); transition: background .4s, color .4s; }
+    a { color: inherit; text-decoration: none; }
+
+    .nav { position: fixed; inset: 0 0 auto 0; height: var(--nav-h); z-index: 10; display: flex; align-items: center; justify-content: space-between; padding: 0 var(--pad); font-size: .9rem; }
+    .brand { font-family: var(--mono); font-weight: 700; letter-spacing: .06em; text-transform: uppercase; display: flex; align-items: center; gap: .6rem; }
+    .brand .mark { display: inline-grid; place-items: center; width: 26px; height: 26px; border: 1px solid var(--accent); color: var(--accent); font-size: .62rem; }
+    .brand .dot { color: var(--accent); }
+    .links { display: flex; gap: 1.6rem; align-items: center; color: var(--muted); }
+    .links a:hover { color: var(--ink); }
+    .links .cta { color: var(--ink); border: 1px solid var(--line); padding: .5rem .95rem; border-radius: 999px; font-family: var(--mono); font-size: .68rem; letter-spacing: .12em; text-transform: uppercase; }
+    .links .cta .sq { display: inline-block; width: 7px; height: 7px; background: var(--accent); margin-right: .45rem; }
+    @media (max-width: 760px) { .links a:not(.cta) { display: none; } }
+
+    .hero { position: relative; min-height: 100svh; overflow: hidden; }
+    .hero::before { content: ""; position: absolute; inset: 0; pointer-events: none;
+      background: radial-gradient(60% 45% at 85% 0%, var(--haze), transparent 70%), radial-gradient(45% 40% at 5% 15%, var(--haze), transparent 70%); opacity: .9; }
+    #cloud { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+    .hero-title { position: absolute; left: var(--pad); bottom: clamp(2.2rem, 8vh, 5rem); z-index: 4; margin: 0;
+      font-family: var(--display); font-weight: 700; letter-spacing: -.035em; line-height: .98; font-size: clamp(2.1rem, 5.2vw, 4.6rem); max-width: 16ch; }
+    .hero-title .accent { color: var(--accent); }
+    .hero-title .w { display: inline-block; opacity: 0; filter: blur(10px); transform: translateY(.15em); animation: wordIn .7s cubic-bezier(.2,.7,.2,1) forwards; }
+    @keyframes wordIn { to { opacity: 1; filter: blur(0); transform: none; } }
+    .caption { position: absolute; right: var(--pad); bottom: clamp(2.2rem, 8vh, 5rem); z-index: 4; max-width: 30ch; text-align: right;
+      font-family: var(--mono); font-size: .66rem; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); line-height: 1.7; }
+    @media (max-width: 760px) {
+      .caption { display: none; }
+      .hero-title { bottom: 2rem; }
+    }
+
+    .below { padding: clamp(3rem, 10vh, 7rem) var(--pad); max-width: 72ch; }
+    .below h2 { font-family: var(--display); font-weight: 700; letter-spacing: -.02em; font-size: clamp(1.4rem, 2.6vw, 2.2rem); margin: 0 0 1rem; }
+    .below p { font-weight: 300; line-height: 1.6; color: var(--muted); font-size: 1.05rem; }
+    .below .mono { font-family: var(--mono); font-size: .7rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+    .swatches { display: flex; gap: .5rem; margin: 1rem 0 2rem; }
+    .swatches span { width: 44px; height: 44px; border-radius: 6px; border: 1px solid var(--line); }
+
+    .panel { position: fixed; right: var(--pad); bottom: 1.2rem; z-index: 20; display: flex; gap: .5rem; align-items: center;
+      font-family: var(--mono); font-size: .66rem; letter-spacing: .1em; text-transform: uppercase; }
+    .panel button { background: var(--bg); color: var(--ink); border: 1px solid var(--line); padding: .55rem .85rem; border-radius: 999px; cursor: pointer; font: inherit; }
+    .panel button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a class="brand" href="/"><span class="mark">JP</span>Jonathan&nbsp;Poeder<span class="dot">.</span></a>
+    <div class="links">
+      <a href="/#about">About</a><a href="/#focus">Focus</a><a href="/#experience">Experience</a><a href="/projects/">Portfolio</a>
+      <a class="cta" href="/#contact"><span class="sq"></span>Get in touch</a>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <canvas id="cloud"></canvas>
+    <h1 class="hero-title">
+      <span class="w" style="animation-delay:.9s">Data</span>
+      <span class="w" style="animation-delay:1.05s">science</span>
+      <span class="w" style="animation-delay:1.2s">for</span>
+      <span class="w" style="animation-delay:1.35s">the</span><br>
+      <span class="w accent" style="animation-delay:1.55s">AI&nbsp;economy.</span>
+    </h1>
+    <div class="caption">Reads your presence. Pointer, scroll, dwell. Scroll to dissolve, scroll back to reform.</div>
+  </header>
+
+  <section class="below">
+    <div class="mono">Review notes</div>
+    <h2>What this is</h2>
+    <p>A drop-in replacement for the wireframe blob on the home page, built from the frame-by-frame teardown of the reference clip. Move the pointer near the shell to pull it. Scroll down and the shell scatters from the top; scroll back and it reforms.</p>
+    <div class="swatches" id="swatches"></div>
+    <p id="stats" class="mono"></p>
+    <h2>What is not in it</h2>
+    <p>No bloom pass (the halo comes from additive blending alone), and no separate galaxy or brain shapes. Both can be added if this direction is approved.</p>
+  </section>
+
+  <div class="panel">
+    <button type="button" data-pal="navy" aria-pressed="true">Navy + cyan</button>
+    <button type="button" data-pal="light" aria-pressed="false">Light + orange</button>
+    <button type="button" id="replay">Replay</button>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="cloud.js?v=2"></script>
+  <script>
+    (function () {
+      var PAL = { navy: ['#02040a', '#0b2859', '#2c3fc5', '#1f81d2', '#38e6e0', '#4fd9b0', '#ceecfa'],
+                  light: ['#f7f7f9', '#fde7d6', '#9a2f00', '#f37021', '#ff9d4d', '#ffcf99', '#111216'] };
+      function swatches(name) {
+        var box = document.getElementById('swatches'); box.innerHTML = '';
+        PAL[name].forEach(function (c) { var s = document.createElement('span'); s.style.background = c; s.title = c; box.appendChild(s); });
+      }
+      document.querySelectorAll('.panel button[data-pal]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          document.querySelectorAll('.panel button[data-pal]').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+          if (window.cloudPalette) window.cloudPalette(b.dataset.pal);
+          swatches(b.dataset.pal);
+        });
+      });
+      document.getElementById('replay').addEventListener('click', function () {
+        if (window.cloudReplay) window.cloudReplay();
+        document.querySelectorAll('.hero-title .w').forEach(function (w) { w.style.animation = 'none'; void w.offsetWidth; w.style.animation = ''; });
+      });
+      swatches('navy');
+      if (window.cloudInfo) document.getElementById('stats').textContent = window.cloudInfo.particles.toLocaleString() + ' particles, three.js r128, no post-processing';
+    })();
+  </script>
+</body>
+</html>
