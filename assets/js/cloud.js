@@ -18,7 +18,7 @@
   if (!canvas || typeof THREE === 'undefined') return;
 
   var isMobile = window.matchMedia('(max-width: 760px)').matches;
-  var GRID = isMobile ? 180 : 300;
+  var GRID = opts.grid || (isMobile ? 180 : 300);
   var pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
 
   var renderer;
@@ -35,12 +35,12 @@
   /* ---------- palettes ---------- */
   var PALETTES = {
     navy: {
-      stops: ['#2c3fc5', '#1f81d2', '#38e6e0', '#4fd9b0'],
+      stops: ['#2c3fc5', '#3f7fcc', '#38e6e0', '#4fd9b0'],
       blend: THREE.AdditiveBlending, alpha: 0.9, size: 4.2, bg: ['#02040a', '#0b2859']
     },
     light: {
-      stops: ['#9a2f00', '#f37021', '#ff9d4d', '#ffcf99'],
-      blend: THREE.NormalBlending, alpha: 0.75, size: 3.6, bg: ['#f7f7f9', '#fde7d6']
+      stops: ['#2c3fc5', '#3f7fcc', '#17a9a4', '#2f9f84'],
+      blend: THREE.NormalBlending, alpha: 0.8, size: 3.6, bg: ['#eef4fb', '#cfe3fb']
     }
   };
 
@@ -137,7 +137,7 @@
     // colour: world-space height ramp
     '  vec4 world = modelMatrix * vec4(pos, 1.0);',
     '  float h = clamp((world.y + 1.15) / 2.3, 0.0, 1.0);',
-    '  vec3 c = h < 0.33 ? mix(uC0, uC1, h / 0.33) : (h < 0.72 ? mix(uC1, uC2, (h - 0.33) / 0.39) : mix(uC2, uC3, (h - 0.72) / 0.28));',
+    '  vec3 c = h < 0.45 ? mix(uC0, uC1, h / 0.45) : (h < 0.88 ? mix(uC1, uC2, (h - 0.45) / 0.43) : mix(uC2, uC3, (h - 0.88) / 0.12));',
     '  vColor = c;',
     '  vAlpha = (0.55 + 0.45 * a) * (1.0 - d) * (0.6 + 0.4 * aSeed) * (1.0 + 0.5 * aFree);',
     '  vec4 mv = viewMatrix * world;',
@@ -210,11 +210,13 @@
     uniforms.uAlpha.value = p.alpha; uniforms.uSize.value = p.size * (isMobile ? 1.35 : 1);
     mat.blending = p.blend; mat.needsUpdate = true;
     bUniforms.uColor.value.set(p.stops[1]);
-    bUniforms.uAlpha.value = name === 'light' ? 0.18 : 0.35;
+    bUniforms.uAlpha.value = opts.static ? 0 : (name === 'light' ? 0.18 : 0.35);
     document.documentElement.setAttribute('data-palette', name);
   }
   window.cloudPalette = applyPalette;
-  applyPalette(opts.palette || document.documentElement.getAttribute('data-palette') || 'navy');
+  function themePalette() { return document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'navy'; }
+  applyPalette(opts.palette || document.documentElement.getAttribute('data-palette') || themePalette());
+  window.addEventListener('themechange', function () { applyPalette(themePalette()); });
 
   /* ---------- sizing ---------- */
   function resize() {
@@ -222,7 +224,7 @@
     renderer.setSize(w, h, false);
     camera.aspect = w / h; camera.updateProjectionMatrix();
     // keep the shell about the same on-screen size at any aspect
-    camera.position.z = isMobile ? 8.2 : (opts.distance || 6.0);
+    camera.position.z = isMobile ? 8.2 : (opts.distance || (opts.static ? 5.0 : 6.0));
     camera.position.x = isMobile ? 0 : (opts.offsetX || 0);
     camera.lookAt(0, 0, 0);
   }
@@ -314,6 +316,7 @@
   /* ---------- scroll drives dissolve ---------- */
   var dissolveTarget = 0;
   function onScroll() {
+    if (opts.static) return;
     var span = window.innerHeight * 0.7;
     dissolveTarget = Math.max(0, Math.min(1, window.scrollY / span));
   }
@@ -322,6 +325,14 @@
 
   /* ---------- replay (for the review page) ---------- */
   var t0 = performance.now(), progressTarget = 1;
+  if (opts.static && 'IntersectionObserver' in window) {
+    // a footer cloud assembles the first time it scrolls into view
+    t0 = Infinity;
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { if (e.isIntersecting && t0 === Infinity) { t0 = performance.now(); io.disconnect(); } });
+    });
+    io.observe(canvas);
+  }
   window.cloudReplay = function () { uniforms.uProgress.value = 0; t0 = performance.now(); };
 
   /* ---------- loop ---------- */
@@ -333,7 +344,7 @@
     uniforms.uTime.value = now / 1000;
     bUniforms.uTime.value = now / 1000;
     // assemble over ~2.4 s after load (reference: 27 frames of condense, then crisp)
-    var pr = reduce ? 1 : Math.min(1, t / 2.4);
+    var pr = reduce ? 1 : (t0 === Infinity ? 0 : Math.min(1, t / 2.4));
     uniforms.uProgress.value += (pr - uniforms.uProgress.value) * Math.min(1, dt * 8);
     uniforms.uDissolve.value += (dissolveTarget - uniforms.uDissolve.value) * Math.min(1, dt * 6);
     if (!reduce) { simulate(dt); group.rotation.y += dt * (Math.PI * 2 / 22); }
@@ -341,13 +352,17 @@
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
-  window.cloudInfo = { particles: count, active: function () { return active; } };
+  window.cloudInfo = { particles: count, active: function () { return active; }, progress: function () { return uniforms.uProgress.value; }, t0: function () { return t0; } };
   }
 
   window.initCloud = initCloud;
   function boot() {
     document.querySelectorAll('canvas[data-cloud]').forEach(function (c) {
-      try { initCloud(c, { offsetX: parseFloat(c.getAttribute('data-offset-x') || '0') }); } catch (e) {}
+      try {
+        initCloud(c, { offsetX: parseFloat(c.getAttribute('data-offset-x') || '0'),
+                       grid: parseInt(c.getAttribute('data-grid') || '0', 10) || 0,
+                       static: c.hasAttribute('data-static') });
+      } catch (e) {}
     });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();

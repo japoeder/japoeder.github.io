@@ -20,7 +20,7 @@
   --accent-2: #4bf2ec;
   --accent-soft: rgba(56, 230, 224, 0.16);
   --indigo: #4150d7;
-  --blue: #1f81d2;
+  --blue: #3f7fcc;
   --mint: #4fd9b0;
   --halo: #0b2859;
   --black: #010308;
@@ -37,6 +37,29 @@
   --maxw: 1480px;
   --pad: clamp(1.1rem, 3.5vw, 3rem);
   --nav-h: 76px;
+}
+
+/* light variant of the same palette: ice blue paper, blue accent for text, cyan kept for marks */
+:root[data-theme="light"] {
+  --bg: #eef4fb;
+  --bg-2: #e3ecf7;
+  --surface: #ffffff;
+  --surface-2: #f5f9fe;
+  --thumb: #e3ecf7;
+  --ink: #0b1a33;
+  --ink-soft: #24395a;
+  --muted: #4a6a8f;
+  --muted-2: #7a93b3;
+  --line: rgba(11, 26, 51, 0.10);
+  --line-2: rgba(11, 26, 51, 0.18);
+  --accent: #1f81d2;
+  --accent-2: #38e6e0;
+  --accent-soft: rgba(31, 129, 210, 0.14);
+  --halo: #cfe3fb;
+  --nav-bg: rgba(238, 244, 251, 0.72);
+  --on-ink: #ffffff;
+  --ink-fill: rgba(11, 26, 51, 0.20);
+  color-scheme: light;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -109,9 +132,20 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; font-weight: 700; lette
 .nav-links a.cta:hover { background: var(--ink); color: var(--on-ink); border-color: var(--ink); }
 .nav-links a.cta .sq { width: 7px; height: 7px; background: var(--accent); display: inline-block; }
 .nav-toggle { display: none; order: 4; }
+.theme-toggle {
+  order: 3; flex: none; display: inline-grid; place-items: center; width: 36px; height: 36px; padding: 0;
+  border: 1px solid var(--line-2); border-radius: 100px; background: transparent; color: var(--ink); cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+.theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+.theme-toggle svg { width: 17px; height: 17px; display: block; }
+.theme-toggle .moon { display: none; }
+:root[data-theme="light"] .theme-toggle .sun { display: none; }
+:root[data-theme="light"] .theme-toggle .moon { display: block; }
 
 @media (max-width: 820px) {
   .nav-toggle { display: flex; flex-direction: column; gap: 5px; background: none; border: 0; cursor: pointer; padding: 6px; }
+  .theme-toggle { margin-left: auto; }
     .nav-toggle span { width: 24px; height: 2px; background: var(--ink); }
   .nav-links {
     position: fixed; inset: var(--nav-h) 0 auto 0; flex-direction: column; align-items: flex-start; gap: 0;
@@ -402,15 +436,17 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; font-weight: 700; lette
 @media (max-width: 960px) { .case-findings { grid-template-columns: 1fr; } }
 
 /* ------------------------ footer (dark) ---------------- */
-.footer { background: var(--black); color: var(--ink-soft); position: relative; overflow: hidden; }
+.footer { background: var(--black); color: #a9c6e0; position: relative; overflow: hidden; }
+.footer .eyebrow, .footer .accent { color: #38e6e0; }
+.footer .eyebrow::before { background: #38e6e0; }
 .footer .eyebrow { color: var(--accent); }
 .footer-cta { padding-block: clamp(4rem, 9vw, 8rem); border-bottom: 1px solid rgba(255,255,255,0.12); position: relative; z-index: 2; }
-.footer-cta h2 { color: var(--ink); font-size: clamp(2.4rem, 7vw, 5.5rem); font-weight: 700; letter-spacing: -0.04em; line-height: 0.98; }
+.footer-cta h2 { color: #ceecfa; font-size: clamp(2.4rem, 7vw, 5.5rem); font-weight: 700; letter-spacing: -0.04em; line-height: 0.98; }
 .footer-cta .accent { color: var(--accent); }
 .contact-note { max-width: 46ch; margin-top: 1.4rem; font-size: clamp(1rem, 1.5vw, 1.2rem); font-weight: 300; color: rgba(255,255,255,0.66); }
 .contact-meta { display: flex; flex-wrap: wrap; gap: 2.5rem; margin-top: 2.5rem; }
 .contact-meta .k { font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.45); margin-bottom: 0.5rem; }
-.contact-meta .v { font-size: 1.02rem; color: var(--ink); }
+.contact-meta .v { font-size: 1.02rem; color: #ceecfa; }
 .contact-meta .v a:hover { color: var(--accent); }
 .socials { display: flex; gap: 1.1rem; }
 .socials a { font-size: 1.15rem; color: rgba(255,255,255,0.8); transition: color 0.2s, transform 0.2s; }
@@ -419,7 +455,7 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; font-weight: 700; lette
 .footer-bar .mono { font-size: 0.66rem; color: rgba(255,255,255,0.5); }
 .footer-bar a { color: rgba(255,255,255,0.7); }
 .footer-bar a:hover { color: var(--accent); }
-.footer-blob { position: absolute; right: -6%; bottom: -30%; width: 42vw; max-width: 560px; height: 42vw; max-height: 560px; z-index: 1; opacity: 0.9; pointer-events: none; }
+.footer-blob { position: absolute; right: -4%; bottom: 0; width: 38vw; max-width: 560px; height: 100%; z-index: 1; opacity: 0.95; pointer-events: none; }
 
 /* ------------------------ reveal ----------------------- */
 .reveal { opacity: 0; transform: translateY(22px); transition: opacity 0.7s cubic-bezier(0.22,1,0.36,1), transform 0.7s cubic-bezier(0.22,1,0.36,1); }

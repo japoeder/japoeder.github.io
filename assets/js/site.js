@@ -104,6 +104,9 @@
     var count = geometry.attributes.position.count;
 
     var material = new THREE.MeshBasicMaterial({ color: new THREE.Color(color), wireframe: true, transparent: true, opacity: 0.82 });
+    window.addEventListener('themechange', function () {
+      material.color.set(document.documentElement.getAttribute('data-theme') === 'light' ? '#1f81d2' : color);
+    });
     var mesh = new THREE.Mesh(geometry, material);
     scene.add(mesh);
 
@@ -156,15 +159,17 @@
     var LANES = 26;
 
     // one soft sprite per ramp stop, tinted once
-    var STOPS = ['#2c3fc5', '#1f81d2', '#38e6e0', '#4fd9b0'];
-    var sprites = STOPS.map(function (hex) {
+    var STOPS = ['#2c3fc5', '#3f7fcc', '#38e6e0', '#4fd9b0'];
+    var STOPS_LIGHT = ['#2c3fc5', '#3f7fcc', '#17a9a4', '#2f9f84'];
+    function makeSprites(stops) { return stops.map(function (hex) {
       var c = document.createElement('canvas'); c.width = c.height = 32;
       var g = c.getContext('2d');
       var r = g.createRadialGradient(16, 16, 0, 16, 16, 16);
       r.addColorStop(0, hex); r.addColorStop(0.35, hex); r.addColorStop(1, 'rgba(0,0,0,0)');
       g.fillStyle = r; g.fillRect(0, 0, 32, 32);
       return c;
-    });
+    }); }
+    var spritesDark = makeSprites(STOPS), spritesLight = makeSprites(STOPS_LIGHT);
 
     var px = new Float32Array(N), lane = new Float32Array(N), off = new Float32Array(N),
         spd = new Float32Array(N), sz = new Float32Array(N), ph = new Float32Array(N);
@@ -191,7 +196,9 @@
       var dt = last ? Math.min(0.05, (t - last) / 1000) : 0.016; last = t;
       var time = t * 0.00022;
       ctx.clearRect(0, 0, W, H);
-      ctx.globalCompositeOperation = 'lighter';
+      var light = document.documentElement.getAttribute('data-theme') === 'light';
+      var sprites = light ? spritesLight : spritesDark;
+      ctx.globalCompositeOperation = light ? 'source-over' : 'lighter';
       var cx = W * 0.62, cy = H * 0.5;
       for (var i = 0; i < N; i++) {
         px[i] += spd[i] * dt;
@@ -207,7 +214,7 @@
           + off[i] * H * 0.025 * (1 + Math.sin(time * 3 + ph[i]));
         // colour by height on the page: high is cyan, low is indigo
         var h = 1 - Math.min(1, Math.max(0, y / H));
-        var si = h < 0.3 ? 0 : (h < 0.6 ? 1 : (h < 0.85 ? 2 : 3));
+        var si = h < 0.2 ? 0 : (h < 0.72 ? 1 : (h < 0.94 ? 2 : 3));
         var a = 0.25 + 0.55 * (0.5 + 0.5 * Math.sin(time * 4 + ph[i]));
         var d = sz[i] * (0.8 + 0.4 * h);
         ctx.globalAlpha = a;
@@ -291,9 +298,9 @@
   function initTheme() {
     var btn = document.getElementById('themeToggle');
     var osDark = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+    // navy is the site's default; only an explicit choice switches to light
     function current() {
-      var t = document.documentElement.getAttribute('data-theme');
-      return t || (osDark && osDark.matches ? 'dark' : 'light');
+      return document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
     }
     function label() {
       if (btn) btn.setAttribute('aria-label', current() === 'dark' ? 'Switch to light theme' : 'Switch to dark theme');
@@ -302,7 +309,8 @@
     if (btn) {
       btn.addEventListener('click', function () {
         var next = current() === 'dark' ? 'light' : 'dark';
-        document.documentElement.setAttribute('data-theme', next);
+        if (next === 'light') document.documentElement.setAttribute('data-theme', 'light');
+        else document.documentElement.removeAttribute('data-theme');
         try { localStorage.setItem('theme', next); } catch (e) {}
         label(); announce();
       });
