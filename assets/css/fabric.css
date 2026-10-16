@@ -41,11 +41,11 @@
 
 /* light variant of the same palette: ice blue paper, blue accent for text, cyan kept for marks */
 :root[data-theme="light"] {
-  --bg: #eef4fb;
-  --bg-2: #e3ecf7;
+  --bg: #f7f9fc;
+  --bg-2: #eef2f7;
   --surface: #ffffff;
-  --surface-2: #f5f9fe;
-  --thumb: #e3ecf7;
+  --surface-2: #f9fbfd;
+  --thumb: #eef2f7;
   --ink: #0b1a33;
   --ink-soft: #24395a;
   --muted: #4a6a8f;
@@ -55,8 +55,8 @@
   --accent: #1f81d2;
   --accent-2: #38e6e0;
   --accent-soft: rgba(31, 129, 210, 0.14);
-  --halo: #cfe3fb;
-  --nav-bg: rgba(238, 244, 251, 0.72);
+  --halo: #dde9f8;
+  --nav-bg: rgba(247, 249, 252, 0.72);
   --on-ink: #ffffff;
   --ink-fill: rgba(11, 26, 51, 0.20);
   color-scheme: light;
