@@ -231,6 +231,9 @@
   /* ---------- pointer: smoothed, with spring back ---------- */
   var ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
   var hit = new THREE.Vector3(), cur = new THREE.Vector3(99, 99, 0), prev = new THREE.Vector3(99, 99, 0);
+  // the pointer's ray in group space: particles are tested against the line
+  // of sight, so only the column the pointer actually covers on screen is hit
+  var ro = new THREE.Vector3(), rd = new THREE.Vector3(), inv = new THREE.Matrix4();
   var cursorIn = false, pendingMove = false;
   function onMove(x, y) {
     var r = canvas.getBoundingClientRect();
@@ -239,6 +242,9 @@
     if (ray.ray.intersectPlane(plane, hit)) {
       group.updateMatrixWorld();
       group.worldToLocal(cur.copy(hit));
+      inv.copy(group.matrixWorld).invert();
+      ro.copy(ray.ray.origin).applyMatrix4(inv);
+      rd.copy(ray.ray.direction).transformDirection(inv).normalize();
       cursorIn = true; pendingMove = true;
     }
   }
@@ -268,17 +274,19 @@
     for (var i = 0, j = 0; i < count; i++, j += 3) {
       var f = free[i];
       if (blast) {
-        // distance from the cursor's line of travel through the cloud: ignore
-        // depth so the whole column the pointer crosses is disturbed
-        var dx = pos[j] - cur.x, dy = pos[j + 1] - cur.y;
-        var q = dx * dx + dy * dy;
+        // distance from the pointer's line of sight, so only the column the
+        // pointer visibly covers is disturbed, whatever the shell's tilt
+        var vx = pos[j] - ro.x, vy = pos[j + 1] - ro.y, vz = pos[j + 2] - ro.z;
+        var t = vx * rd.x + vy * rd.y + vz * rd.z;
+        var dx = vx - t * rd.x, dy = vy - t * rd.y, dz = vz - t * rd.z;
+        var q = dx * dx + dy * dy + dz * dz;
         if (q < r2) {
           var dd = Math.sqrt(q) + 1e-4, w = 1 - dd / BLAST_R;
           f = free[i] = 1;
-          var rz = (Math.random() - 0.5);
-          vel[j] += (dx / dd * 0.6 + sx / (speed + 1e-4) * 0.8 + (Math.random() - 0.5) * 0.4) * kick * w;
-          vel[j + 1] += (dy / dd * 0.6 + sy / (speed + 1e-4) * 0.8 + (Math.random() - 0.5) * 0.4) * kick * w;
-          vel[j + 2] += (rz * 1.2) * kick * w;
+          var jx = (Math.random() - 0.5) * 0.5, jy = (Math.random() - 0.5) * 0.5, jz = (Math.random() - 0.5) * 0.5;
+          vel[j] += (dx / dd * 0.6 + sx / (speed + 1e-4) * 0.8 + jx) * kick * w;
+          vel[j + 1] += (dy / dd * 0.6 + sy / (speed + 1e-4) * 0.8 + jy) * kick * w;
+          vel[j + 2] += (dz / dd * 0.6 + sz / (speed + 1e-4) * 0.8 + jz) * kick * w;
         }
       }
       if (f <= 0) continue;
