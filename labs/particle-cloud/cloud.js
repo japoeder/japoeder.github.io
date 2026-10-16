@@ -44,17 +44,19 @@
   };
 
   /* ---------- geometry ---------- */
-  // Grid sphere, phi from pole to pole, with a cap skipped at both ends so a
-  // hole runs through the shell. The grid is what produces the moire.
-  var cap = 0.62;                 // |cos(phi)| above this is skipped
+  // Grid sphere, phi from pole to pole. The grid is what produces the moire.
+  // Full sphere, no holes. A lat/long grid bunches up at the poles, so rows
+  // near a pole keep only a sin(phi) share of their columns; density stays
+  // even and the grid lines (the moire) survive.
   var rows = GRID, cols = GRID;
   var targets = [], starts = [], delays = [], seeds = [];
   for (var i = 0; i < rows; i++) {
     var phi = Math.PI * (i + 0.5) / rows;
     var cy = Math.cos(phi);
-    if (Math.abs(cy) > cap) continue;
     var sy = Math.sin(phi);
-    for (var j = 0; j < cols; j++) {
+    var keep = Math.max(1, Math.round(cols * sy));
+    for (var jj = 0; jj < keep; jj++) {
+      var j = Math.floor(jj * cols / keep);
       var theta = 2 * Math.PI * j / cols;
       targets.push(sy * Math.cos(theta), cy, sy * Math.sin(theta));
       // start: random point in a wide sphere, radius 1.5 to 4
@@ -67,8 +69,17 @@
     }
   }
   var count = delays.length;
+  // Simulation state. `position` is the simulated position (starts on the
+  // shell); aTarget is the particle's slot; aFree is 1 right after a cursor
+  // blast and decays to 0 as gravity and the spring bring it home.
+  var tgt = new Float32Array(targets), pos = new Float32Array(targets);
+  var vel = new Float32Array(count * 3), free = new Float32Array(count);
   var geo = new THREE.BufferGeometry();
-  geo.setAttribute('position', new THREE.Float32BufferAttribute(targets, 3));
+  var posAttr = new THREE.BufferAttribute(pos, 3); posAttr.setUsage(THREE.DynamicDrawUsage);
+  var freeAttr = new THREE.BufferAttribute(free, 1); freeAttr.setUsage(THREE.DynamicDrawUsage);
+  geo.setAttribute('position', posAttr);
+  geo.setAttribute('aFree', freeAttr);
+  geo.setAttribute('aTarget', new THREE.BufferAttribute(tgt, 3));
   geo.setAttribute('aStart', new THREE.Float32BufferAttribute(starts, 3));
   geo.setAttribute('aDelay', new THREE.Float32BufferAttribute(delays, 1));
   geo.setAttribute('aSeed', new THREE.Float32BufferAttribute(seeds, 1));
@@ -100,18 +111,19 @@
   ].join('\n');
 
   var VERT = NOISE + '\n' + [
-    'attribute vec3 aStart; attribute float aDelay; attribute float aSeed;',
-    'uniform float uTime, uProgress, uDissolve, uSize, uPixelRatio, uPull;',
-    'uniform vec3 uMouse;',
+    'attribute vec3 aStart; attribute vec3 aTarget; attribute float aDelay; attribute float aSeed; attribute float aFree;',
+    'uniform float uTime, uProgress, uDissolve, uSize, uPixelRatio;',
     'uniform vec3 uC0, uC1, uC2, uC3;',
     'varying vec3 vColor; varying float vAlpha;',
     'float easeOut(float t){ return 1.0 - pow(1.0 - t, 3.0); }',
     'void main(){',
-    '  vec3 tgt = position;',
+    '  vec3 tgt = aTarget;',
     // ripple: low frequency noise along the normal, animated; plus breathing
     '  float n = snoise(tgt * 1.5 + vec3(0.0, uTime * 0.18, uTime * 0.11));',
     '  float n2 = snoise(tgt * 4.0 - uTime * 0.25) * 0.25;',
     '  vec3 p = tgt * (1.0 + 0.2 * n + 0.05 * n2) * (1.0 + 0.025 * sin(uTime * 0.7));',
+    // loose particles follow the simulation instead of the shell
+    '  p = mix(p, position, smoothstep(0.0, 0.25, aFree));',
     // assemble: each particle has its own window inside uProgress
     '  float a = clamp((uProgress - aDelay * 0.65) / 0.35, 0.0, 1.0);',
     '  a = easeOut(a);',
@@ -121,19 +133,14 @@
     '  float d = clamp((uDissolve - order * 0.45 - aSeed * 0.15) / 0.4, 0.0, 1.0);',
     '  d = d * d;',
     '  pos += normalize(p) * d * (1.6 + aSeed) + vec3(0.0, -0.5, 0.0) * d;',
-    // cursor: pull particles near the pointer toward it, far side unaffected
-    '  vec3 toM = uMouse - pos;',
-    '  float dist = length(toM);',
-    '  float pull = exp(-dist * dist * 2.2) * uPull;',
-    '  pos += toM * pull * 0.55;',
     // colour: world-space height ramp
     '  vec4 world = modelMatrix * vec4(pos, 1.0);',
     '  float h = clamp((world.y + 1.15) / 2.3, 0.0, 1.0);',
     '  vec3 c = h < 0.33 ? mix(uC0, uC1, h / 0.33) : (h < 0.72 ? mix(uC1, uC2, (h - 0.33) / 0.39) : mix(uC2, uC3, (h - 0.72) / 0.28));',
     '  vColor = c;',
-    '  vAlpha = (0.55 + 0.45 * a) * (1.0 - d) * (0.6 + 0.4 * aSeed);',
+    '  vAlpha = (0.55 + 0.45 * a) * (1.0 - d) * (0.6 + 0.4 * aSeed) * (1.0 + 0.5 * aFree);',
     '  vec4 mv = viewMatrix * world;',
-    '  gl_PointSize = uSize * uPixelRatio * (1.0 + 0.6 * pull) * (4.8 / -mv.z);',
+    '  gl_PointSize = uSize * uPixelRatio * (1.0 + 0.5 * aFree) * (4.8 / -mv.z);',
     '  gl_Position = projectionMatrix * mv;',
     '}'
   ].join('\n');
@@ -150,8 +157,7 @@
 
   var uniforms = {
     uTime: { value: 0 }, uProgress: { value: 0 }, uDissolve: { value: 0 },
-    uSize: { value: 2.2 }, uPixelRatio: { value: pixelRatio }, uPull: { value: 0 },
-    uMouse: { value: new THREE.Vector3(99, 99, 0) }, uAlpha: { value: 0.55 },
+    uSize: { value: 2.2 }, uPixelRatio: { value: pixelRatio }, uAlpha: { value: 0.55 },
     uC0: { value: new THREE.Color() }, uC1: { value: new THREE.Color() },
     uC2: { value: new THREE.Color() }, uC3: { value: new THREE.Color() }
   };
@@ -162,7 +168,7 @@
   var points = new THREE.Points(geo, mat);
   var group = new THREE.Group();
   group.add(points);
-  // tilt so the hole is seen off axis, like the reference
+  // tilt so the pole axis leans toward the camera (the swirl reads as a spiral)
   group.rotation.x = 0.95;
   group.rotation.z = 0.35;
   scene.add(group);
@@ -224,18 +230,77 @@
 
   /* ---------- pointer: smoothed, with spring back ---------- */
   var ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
-  var hit = new THREE.Vector3(), mouseTarget = new THREE.Vector3(99, 99, 0), pullTarget = 0, lastMove = 0;
+  var hit = new THREE.Vector3(), cur = new THREE.Vector3(99, 99, 0), prev = new THREE.Vector3(99, 99, 0);
+  var cursorIn = false, pendingMove = false;
   function onMove(x, y) {
     var r = canvas.getBoundingClientRect();
     ndc.set(((x - r.left) / r.width) * 2 - 1, -((y - r.top) / r.height) * 2 + 1);
     ray.setFromCamera(ndc, camera);
     if (ray.ray.intersectPlane(plane, hit)) {
-      group.worldToLocal(mouseTarget.copy(hit));
-      pullTarget = 1; lastMove = performance.now();
+      group.updateMatrixWorld();
+      group.worldToLocal(cur.copy(hit));
+      cursorIn = true; pendingMove = true;
     }
   }
   window.addEventListener('pointermove', function (e) { onMove(e.clientX, e.clientY); }, { passive: true });
-  window.addEventListener('pointerleave', function () { pullTarget = 0; });
+  window.addEventListener('pointerleave', function () { cursorIn = false; });
+
+  /* ---------- simulation: blast, gravity, swirl, spring home ---------- */
+  // The cursor is a body passing through gas. Particles within BLAST_R of its
+  // path are thrown outward with the cursor's speed. Loose particles then feel
+  // a central gravity, a tangential swirl around the shell's axis (so they
+  // orbit rather than fall straight in), drag, and a spring back to their slot
+  // that strengthens as aFree decays. Once home they snap and go quiet.
+  var BLAST_R = 0.5, BLAST = 2.6, G = 3.0, SOFT = 0.35, SWIRL = 1.6, DRAG = 1.1, SPRING = 7.0, RELAX = 3.2;
+  var active = 0;
+  function simulate(dt) {
+    var blast = false, sx = 0, sy = 0, sz = 0, speed = 0;
+    if (pendingMove && cursorIn) {
+      sx = cur.x - prev.x; sy = cur.y - prev.y; sz = cur.z - prev.z;
+      speed = Math.sqrt(sx * sx + sy * sy + sz * sz);
+      blast = prev.x < 50 && speed > 0.004 && speed < 2.5;
+      prev.copy(cur); pendingMove = false;
+    }
+    if (!blast && active === 0) return;
+    var r2 = BLAST_R * BLAST_R, kick = BLAST * Math.min(1, 0.35 + speed * 6);
+    var ax = 0, ay = 1, az = 0; // shell axis in group space
+    active = 0;
+    for (var i = 0, j = 0; i < count; i++, j += 3) {
+      var f = free[i];
+      if (blast) {
+        // distance from the cursor's line of travel through the cloud: ignore
+        // depth so the whole column the pointer crosses is disturbed
+        var dx = pos[j] - cur.x, dy = pos[j + 1] - cur.y;
+        var q = dx * dx + dy * dy;
+        if (q < r2) {
+          var dd = Math.sqrt(q) + 1e-4, w = 1 - dd / BLAST_R;
+          f = free[i] = 1;
+          var rz = (Math.random() - 0.5);
+          vel[j] += (dx / dd * 0.6 + sx / (speed + 1e-4) * 0.8 + (Math.random() - 0.5) * 0.4) * kick * w;
+          vel[j + 1] += (dy / dd * 0.6 + sy / (speed + 1e-4) * 0.8 + (Math.random() - 0.5) * 0.4) * kick * w;
+          vel[j + 2] += (rz * 1.2) * kick * w;
+        }
+      }
+      if (f <= 0) continue;
+      var px = pos[j], py = pos[j + 1], pz = pos[j + 2];
+      var r = Math.sqrt(px * px + py * py + pz * pz) + 1e-4;
+      var g = G / (r * r + SOFT);
+      // gravity toward the centre, swirl around the axis (cross(axis, pos)/r)
+      var axx = -px / r * g + (ay * pz - az * py) / r * SWIRL;
+      var ayy = -py / r * g + (az * px - ax * pz) / r * SWIRL;
+      var azz = -pz / r * g + (ax * py - ay * px) / r * SWIRL;
+      var home = (1 - f); home = home * home * SPRING;
+      axx += (tgt[j] - px) * home; ayy += (tgt[j + 1] - py) * home; azz += (tgt[j + 2] - pz) * home;
+      var dragK = 1 - Math.min(0.9, DRAG * dt * (1 + 2 * (1 - f)));
+      vel[j] = (vel[j] + axx * dt) * dragK; vel[j + 1] = (vel[j + 1] + ayy * dt) * dragK; vel[j + 2] = (vel[j + 2] + azz * dt) * dragK;
+      pos[j] = px + vel[j] * dt; pos[j + 1] = py + vel[j + 1] * dt; pos[j + 2] = pz + vel[j + 2] * dt;
+      f -= dt / RELAX;
+      if (f <= 0) { f = 0; pos[j] = tgt[j]; pos[j + 1] = tgt[j + 1]; pos[j + 2] = tgt[j + 2]; vel[j] = vel[j + 1] = vel[j + 2] = 0; }
+      else active++;
+      free[i] = f;
+    }
+    posAttr.needsUpdate = true; freeAttr.needsUpdate = true;
+  }
 
   /* ---------- scroll drives dissolve ---------- */
   var dissolveTarget = 0;
@@ -262,15 +327,10 @@
     var pr = reduce ? 1 : Math.min(1, t / 2.4);
     uniforms.uProgress.value += (pr - uniforms.uProgress.value) * Math.min(1, dt * 8);
     uniforms.uDissolve.value += (dissolveTarget - uniforms.uDissolve.value) * Math.min(1, dt * 6);
-    // pointer: pull in fast (~5 frames), relax slow (~10 frames) after the pointer stops
-    if (now - lastMove > 140) pullTarget = 0;
-    var k = pullTarget > uniforms.uPull.value ? 14 : 5;
-    uniforms.uPull.value += (pullTarget - uniforms.uPull.value) * Math.min(1, dt * k);
-    uniforms.uMouse.value.lerp(mouseTarget, Math.min(1, dt * 12));
-    if (!reduce) group.rotation.y += dt * (Math.PI * 2 / 22);
+    if (!reduce) { simulate(dt); group.rotation.y += dt * (Math.PI * 2 / 22); }
     renderer.render(scene, camera);
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
-  window.cloudInfo = { particles: count };
+  window.cloudInfo = { particles: count, active: function () { return active; } };
 })();
