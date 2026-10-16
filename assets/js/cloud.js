@@ -58,7 +58,7 @@
     var keep = Math.max(1, Math.round(cols * sy));
     for (var jj = 0; jj < keep; jj++) {
       var j = Math.floor(jj * cols / keep);
-      var theta = 2 * Math.PI * j / cols;
+      var theta = 2 * Math.PI * j / cols + i * 2.399963; // per-row twist (golden angle) hides the seam
       targets.push(sy * Math.cos(theta), cy, sy * Math.sin(theta));
       // start: random point in a wide sphere, radius 1.5 to 4
       var r = opts.static ? 1.1 + Math.random() * 1.1 : 1.5 + Math.random() * 2.5;
@@ -208,7 +208,8 @@
     uniforms.uC0.value.set(p.stops[0]); uniforms.uC1.value.set(p.stops[1]);
     uniforms.uC2.value.set(p.stops[2]); uniforms.uC3.value.set(p.stops[3]);
     // phones: a smaller shell with fewer, dimmer, smaller sprites, so additive blending does not saturate to white
-    uniforms.uAlpha.value = p.alpha * (isMobile ? 0.42 : 1); uniforms.uSize.value = p.size * (isMobile ? 0.6 : 1) * Math.sqrt(300 / GRID);
+    var additive = p.blend === THREE.AdditiveBlending;
+    uniforms.uAlpha.value = p.alpha * (isMobile && additive ? 0.42 : 1); uniforms.uSize.value = p.size * (isMobile ? (additive ? 0.6 : 0.85) : 1) * Math.sqrt(300 / GRID);
     mat.blending = p.blend; mat.needsUpdate = true;
     bUniforms.uColor.value.set(p.stops[1]);
     bUniforms.uAlpha.value = opts.static ? 0 : (name === 'light' ? 0.18 : 0.35);
