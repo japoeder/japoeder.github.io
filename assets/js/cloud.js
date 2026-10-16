@@ -208,7 +208,7 @@
     uniforms.uC0.value.set(p.stops[0]); uniforms.uC1.value.set(p.stops[1]);
     uniforms.uC2.value.set(p.stops[2]); uniforms.uC3.value.set(p.stops[3]);
     // phones: a smaller shell with fewer, dimmer, smaller sprites, so additive blending does not saturate to white
-    uniforms.uAlpha.value = p.alpha * (isMobile ? 0.55 : 1); uniforms.uSize.value = p.size * (isMobile ? 0.7 : 1) * Math.sqrt(300 / GRID);
+    uniforms.uAlpha.value = p.alpha * (isMobile ? 0.42 : 1); uniforms.uSize.value = p.size * (isMobile ? 0.6 : 1) * Math.sqrt(300 / GRID);
     mat.blending = p.blend; mat.needsUpdate = true;
     bUniforms.uColor.value.set(p.stops[1]);
     bUniforms.uAlpha.value = opts.static ? 0 : (name === 'light' ? 0.18 : 0.35);
@@ -225,7 +225,7 @@
     renderer.setSize(w, h, false);
     camera.aspect = w / h; camera.updateProjectionMatrix();
     // keep the shell about the same on-screen size at any aspect
-    camera.position.z = isMobile ? (opts.static ? 11 : 6.4) : (opts.distance || (opts.static ? 5.6 : 6.0));
+    camera.position.z = isMobile ? (opts.static ? 11 : 5.4) : (opts.distance || (opts.static ? 5.6 : 6.0));
     camera.position.x = isMobile ? 0 : (opts.offsetX || 0);
     // shiftX moves the shell itself (lookAt keeps the origin centred, so camera x only changes the angle)
     group.position.x = isMobile ? (opts.shiftX || 0) * 0.6 : (opts.shiftX || 0);
