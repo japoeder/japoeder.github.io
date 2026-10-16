@@ -51,6 +51,19 @@
   // even and the grid lines (the moire) survive.
   var rows = GRID, cols = GRID;
   var targets = [], starts = [], delays = [], seeds = [];
+  if (opts.ribbon) {
+    // a flowing sheet: aTarget holds (u along the flow, v across it, depth);
+    // the vertex shader turns that into the wave and drifts u over time
+    var RU = isMobile ? 260 : 420, RV = isMobile ? 70 : 110;
+    for (var ri = 0; ri < RV; ri++) {
+      for (var rj = 0; rj < RU; rj++) {
+        targets.push(rj / RU * 10.0, (ri / (RV - 1)) * 2 - 1, (Math.random() - 0.5) * 0.3);
+        starts.push((Math.random() - 0.5) * 10, (Math.random() - 0.5) * 6, (Math.random() - 0.5) * 2);
+        delays.push(Math.random()); seeds.push(Math.random());
+      }
+    }
+    rows = 0;
+  }
   for (var i = 0; i < rows; i++) {
     var phi = Math.PI * (i + 0.5) / rows;
     var cy = Math.cos(phi);
@@ -113,7 +126,7 @@
 
   var VERT = NOISE + '\n' + [
     'attribute vec3 aStart; attribute vec3 aTarget; attribute float aDelay; attribute float aSeed; attribute float aFree;',
-    'uniform float uTime, uProgress, uDissolve, uSize, uPixelRatio;',
+    'uniform float uTime, uProgress, uDissolve, uSize, uPixelRatio, uRibbon;',
     'uniform vec3 uC0, uC1, uC2, uC3; uniform float uYOff;',
     'varying vec3 vColor; varying float vAlpha;',
     'float easeOut(float t){ return 1.0 - pow(1.0 - t, 3.0); }',
@@ -123,6 +136,15 @@
     '  float n = snoise(tgt * 1.5 + vec3(0.0, uTime * 0.18, uTime * 0.11));',
     '  float n2 = snoise(tgt * 4.0 - uTime * 0.25) * 0.25;',
     '  vec3 p = tgt * (1.0 + 0.2 * n + 0.05 * n2) * (1.0 + 0.025 * sin(uTime * 0.7));',
+    '  if (uRibbon > 0.5) {',
+    // flow along x and wrap; the wave is the same shape the line streams drew
+    '    float x = mod(tgt.x + uTime * 0.55, 10.0) - 5.0;',
+    '    float v = tgt.y;',
+    '    float amp = 0.55 + 0.45 * (v * 0.5 + 0.5);',
+    '    float y = sin(x * 0.75 + uTime * 0.22 + v * 2.4) * amp + sin(x * 1.6 - uTime * 0.3 + v * 1.2) * amp * 0.4 + v * 0.55;',
+    '    float z = tgt.z + snoise(vec3(x * 0.6, v * 1.5, uTime * 0.15)) * 0.35;',
+    '    p = vec3(x, y, z);',
+    '  }',
     // loose particles follow the simulation instead of the shell
     '  p = mix(p, position, smoothstep(0.0, 0.25, aFree));',
     // assemble: each particle has its own window inside uProgress
@@ -158,7 +180,7 @@
 
   var uniforms = {
     uTime: { value: 0 }, uProgress: { value: 0 }, uDissolve: { value: 0 },
-    uSize: { value: 2.2 }, uPixelRatio: { value: pixelRatio }, uAlpha: { value: 0.55 },
+    uSize: { value: 2.2 }, uPixelRatio: { value: pixelRatio }, uAlpha: { value: 0.55 }, uRibbon: { value: opts.ribbon ? 1 : 0 },
     uC0: { value: new THREE.Color() }, uC1: { value: new THREE.Color() },
     uC2: { value: new THREE.Color() }, uC3: { value: new THREE.Color() }, uYOff: { value: 0 }
   };
@@ -170,8 +192,7 @@
   var group = new THREE.Group();
   group.add(points);
   // tilt so the pole axis leans toward the camera (the swirl reads as a spiral)
-  group.rotation.x = 0.95;
-  group.rotation.z = 0.35;
+  if (!opts.ribbon) { group.rotation.x = 0.95; group.rotation.z = 0.35; }
   scene.add(group);
 
   /* ---------- background bokeh ---------- */
@@ -209,10 +230,10 @@
     uniforms.uC2.value.set(p.stops[2]); uniforms.uC3.value.set(p.stops[3]);
     // phones: a smaller shell with fewer, dimmer, smaller sprites, so additive blending does not saturate to white
     var additive = p.blend === THREE.AdditiveBlending;
-    uniforms.uAlpha.value = p.alpha * (isMobile && additive ? 0.42 : 1); uniforms.uSize.value = p.size * (isMobile ? (additive ? 0.6 : 0.85) : 1) * Math.sqrt(300 / GRID);
+    uniforms.uAlpha.value = p.alpha * (isMobile && additive && !opts.ribbon ? 0.42 : 1); uniforms.uSize.value = p.size * (isMobile ? (additive && !opts.ribbon ? 0.6 : (opts.ribbon ? 1.15 : 0.85)) : 1) * (opts.ribbon ? 0.8 : Math.sqrt(300 / GRID));
     mat.blending = p.blend; mat.needsUpdate = true;
     bUniforms.uColor.value.set(p.stops[1]);
-    bUniforms.uAlpha.value = opts.static ? 0 : (name === 'light' ? 0.18 : 0.35);
+    bUniforms.uAlpha.value = (opts.static || opts.ribbon) ? 0 : (name === 'light' ? 0.18 : 0.35);
     document.documentElement.setAttribute('data-palette', name);
   }
   window.cloudPalette = applyPalette;
@@ -232,6 +253,13 @@
     group.position.x = isMobile ? (opts.shiftX || 0) * 0.6 : (opts.shiftX || 0);
     group.position.y = isMobile && opts.static ? -1.8 : 0;
     uniforms.uYOff.value = group.position.y;
+    if (opts.ribbon) {
+      // 10 units across, whatever the canvas shape
+      var half = Math.tan(camera.fov * Math.PI / 360);
+      // phones show 6 of the 10 units so the lattice stays legible
+      camera.position.z = (isMobile ? 3.2 : 5.4) / (half * camera.aspect);
+      camera.position.x = 0;
+    }
     camera.lookAt(0, 0, 0);
   }
   window.addEventListener('resize', resize);
@@ -322,7 +350,7 @@
   /* ---------- scroll drives dissolve ---------- */
   var dissolveTarget = 0;
   function onScroll() {
-    if (opts.static) return;
+    if (opts.static || opts.ribbon) return;
     var span = window.innerHeight * 0.7;
     dissolveTarget = Math.max(0, Math.min(1, window.scrollY / span));
   }
@@ -353,7 +381,7 @@
     var pr = reduce ? 1 : (t0 === Infinity ? 0 : Math.min(1, t / 2.4));
     uniforms.uProgress.value += (pr - uniforms.uProgress.value) * Math.min(1, dt * 8);
     uniforms.uDissolve.value += (dissolveTarget - uniforms.uDissolve.value) * Math.min(1, dt * 6);
-    if (!reduce) { simulate(dt); group.rotation.y += dt * (Math.PI * 2 / 22); }
+    if (!reduce && !opts.ribbon) { simulate(dt); group.rotation.y += dt * (Math.PI * 2 / 22); }
     renderer.render(scene, camera);
     requestAnimationFrame(frame);
   }
@@ -369,7 +397,7 @@
         initCloud(c, { offsetX: parseFloat(c.getAttribute('data-offset-x') || '0'),
                        grid: parseInt(c.getAttribute('data-grid') || '0', 10) || 0,
                        shiftX: parseFloat(c.getAttribute('data-shift-x') || '0'),
-                       static: c.hasAttribute('data-static') });
+                       static: c.hasAttribute('data-static'), ribbon: c.hasAttribute('data-ribbon') });
       } catch (e) {}
     });
   }
