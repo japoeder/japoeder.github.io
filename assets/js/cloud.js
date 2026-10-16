@@ -18,7 +18,7 @@
   if (!canvas || typeof THREE === 'undefined') return;
 
   var isMobile = window.matchMedia('(max-width: 760px)').matches;
-  var GRID = opts.grid || (isMobile ? 180 : 300);
+  var GRID = opts.grid || (isMobile ? 150 : 300);
   var pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
 
   var renderer;
@@ -114,7 +114,7 @@
   var VERT = NOISE + '\n' + [
     'attribute vec3 aStart; attribute vec3 aTarget; attribute float aDelay; attribute float aSeed; attribute float aFree;',
     'uniform float uTime, uProgress, uDissolve, uSize, uPixelRatio;',
-    'uniform vec3 uC0, uC1, uC2, uC3;',
+    'uniform vec3 uC0, uC1, uC2, uC3; uniform float uYOff;',
     'varying vec3 vColor; varying float vAlpha;',
     'float easeOut(float t){ return 1.0 - pow(1.0 - t, 3.0); }',
     'void main(){',
@@ -136,7 +136,7 @@
     '  pos += normalize(p) * d * (1.6 + aSeed) + vec3(0.0, -0.5, 0.0) * d;',
     // colour: world-space height ramp
     '  vec4 world = modelMatrix * vec4(pos, 1.0);',
-    '  float h = clamp((world.y + 1.15) / 2.3, 0.0, 1.0);',
+    '  float h = clamp((world.y - uYOff + 1.15) / 2.3, 0.0, 1.0);',
     '  vec3 c = h < 0.45 ? mix(uC0, uC1, h / 0.45) : (h < 0.88 ? mix(uC1, uC2, (h - 0.45) / 0.43) : mix(uC2, uC3, (h - 0.88) / 0.12));',
     '  vColor = c;',
     '  vAlpha = (0.55 + 0.45 * a) * (1.0 - d) * (0.6 + 0.4 * aSeed) * (1.0 + 0.5 * aFree);',
@@ -160,7 +160,7 @@
     uTime: { value: 0 }, uProgress: { value: 0 }, uDissolve: { value: 0 },
     uSize: { value: 2.2 }, uPixelRatio: { value: pixelRatio }, uAlpha: { value: 0.55 },
     uC0: { value: new THREE.Color() }, uC1: { value: new THREE.Color() },
-    uC2: { value: new THREE.Color() }, uC3: { value: new THREE.Color() }
+    uC2: { value: new THREE.Color() }, uC3: { value: new THREE.Color() }, uYOff: { value: 0 }
   };
   var mat = new THREE.ShaderMaterial({
     uniforms: uniforms, vertexShader: VERT, fragmentShader: FRAG,
@@ -207,14 +207,15 @@
     var p = PALETTES[name] || PALETTES.navy;
     uniforms.uC0.value.set(p.stops[0]); uniforms.uC1.value.set(p.stops[1]);
     uniforms.uC2.value.set(p.stops[2]); uniforms.uC3.value.set(p.stops[3]);
-    uniforms.uAlpha.value = p.alpha; uniforms.uSize.value = p.size * (isMobile ? 1.35 : 1) * Math.sqrt(300 / GRID);
+    // phones: a smaller shell with fewer, dimmer, smaller sprites, so additive blending does not saturate to white
+    uniforms.uAlpha.value = p.alpha * (isMobile ? 0.55 : 1); uniforms.uSize.value = p.size * (isMobile ? 0.7 : 1) * Math.sqrt(300 / GRID);
     mat.blending = p.blend; mat.needsUpdate = true;
     bUniforms.uColor.value.set(p.stops[1]);
     bUniforms.uAlpha.value = opts.static ? 0 : (name === 'light' ? 0.18 : 0.35);
     document.documentElement.setAttribute('data-palette', name);
   }
   window.cloudPalette = applyPalette;
-  function themePalette() { return document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'navy'; }
+  function themePalette() { return !opts.static && document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'navy'; }
   applyPalette(opts.palette || document.documentElement.getAttribute('data-palette') || themePalette());
   window.addEventListener('themechange', function () { applyPalette(themePalette()); });
 
@@ -224,11 +225,12 @@
     renderer.setSize(w, h, false);
     camera.aspect = w / h; camera.updateProjectionMatrix();
     // keep the shell about the same on-screen size at any aspect
-    camera.position.z = isMobile ? (opts.static ? 11 : 8.2) : (opts.distance || (opts.static ? 5.6 : 6.0));
+    camera.position.z = isMobile ? (opts.static ? 11 : 6.4) : (opts.distance || (opts.static ? 5.6 : 6.0));
     camera.position.x = isMobile ? 0 : (opts.offsetX || 0);
     // shiftX moves the shell itself (lookAt keeps the origin centred, so camera x only changes the angle)
     group.position.x = isMobile ? (opts.shiftX || 0) * 0.6 : (opts.shiftX || 0);
     group.position.y = isMobile && opts.static ? -1.8 : 0;
+    uniforms.uYOff.value = group.position.y;
     camera.lookAt(0, 0, 0);
   }
   window.addEventListener('resize', resize);
@@ -356,6 +358,7 @@
   }
   requestAnimationFrame(frame);
   window.cloudInfo = { particles: count, active: function () { return active; }, progress: function () { return uniforms.uProgress.value; }, t0: function () { return t0; } };
+  (window.cloudInstances = window.cloudInstances || []).push({ canvas: canvas, particles: count, progress: function () { return uniforms.uProgress.value; }, dissolve: function () { return uniforms.uDissolve.value; }, t0: function () { return t0; }, camZ: function () { return camera.position.z; }, size: function () { return uniforms.uSize.value; } });
   }
 
   window.initCloud = initCloud;
