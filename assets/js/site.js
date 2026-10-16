@@ -155,18 +155,19 @@
     var dpr = Math.min(window.devicePixelRatio || 1, 2);
     var W, H;
     var mobile = window.matchMedia('(max-width: 760px)').matches;
-    var N = mobile ? 1100 : 3400;
+    var N = mobile ? 3200 : 7500;
     var LANES = 26;
 
     // one soft sprite per ramp stop, tinted once
     var STOPS = ['#2c3fc5', '#3f7fcc', '#38e6e0', '#4fd9b0'];
     var STOPS_LIGHT = ['#2c3fc5', '#3f7fcc', '#17a9a4', '#2f9f84'];
     function makeSprites(stops) { return stops.map(function (hex) {
-      var c = document.createElement('canvas'); c.width = c.height = 32;
+      // a small, mostly solid dot with a short falloff: the same crisp grain as the hero shell
+      var c = document.createElement('canvas'); c.width = c.height = 16;
       var g = c.getContext('2d');
-      var r = g.createRadialGradient(16, 16, 0, 16, 16, 16);
-      r.addColorStop(0, hex); r.addColorStop(0.35, hex); r.addColorStop(1, 'rgba(0,0,0,0)');
-      g.fillStyle = r; g.fillRect(0, 0, 32, 32);
+      var r = g.createRadialGradient(8, 8, 0, 8, 8, 8);
+      r.addColorStop(0, hex); r.addColorStop(0.55, hex); r.addColorStop(1, 'rgba(0,0,0,0)');
+      g.fillStyle = r; g.fillRect(0, 0, 16, 16);
       return c;
     }); }
     var spritesDark = makeSprites(STOPS), spritesLight = makeSprites(STOPS_LIGHT);
@@ -178,7 +179,7 @@
       lane[i] = Math.random();
       off[i] = (Math.random() - 0.5);
       spd[i] = 0.018 + Math.random() * 0.03;
-      sz[i] = 1.2 + Math.random() * 3.0;
+      sz[i] = 0.55 + Math.random() * 1.1;
       ph[i] = Math.random() * 6.283;
     }
 
@@ -215,7 +216,7 @@
         // colour by height on the page: high is cyan, low is indigo
         var h = 1 - Math.min(1, Math.max(0, y / H));
         var si = h < 0.2 ? 0 : (h < 0.72 ? 1 : (h < 0.94 ? 2 : 3));
-        var a = 0.25 + 0.55 * (0.5 + 0.5 * Math.sin(time * 4 + ph[i]));
+        var a = 0.35 + 0.55 * (0.5 + 0.5 * Math.sin(time * 4 + ph[i]));
         var d = sz[i] * (0.8 + 0.4 * h);
         ctx.globalAlpha = a;
         ctx.drawImage(sprites[si], x - d, y - d, d * 2, d * 2);
