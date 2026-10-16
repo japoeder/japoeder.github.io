@@ -216,7 +216,7 @@
     document.documentElement.setAttribute('data-palette', name);
   }
   window.cloudPalette = applyPalette;
-  function themePalette() { return !opts.static && document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'navy'; }
+  function themePalette() { return document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'navy'; }
   applyPalette(opts.palette || document.documentElement.getAttribute('data-palette') || themePalette());
   window.addEventListener('themechange', function () { applyPalette(themePalette()); });
 
