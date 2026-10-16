@@ -209,11 +209,13 @@
       { card: [0.795, 0.725], n: 3 }  // Build with me -> bottom-right
     ];
 
-    var black = (getComputedStyle(document.documentElement).getPropertyValue('--black') || '#111317').trim() || '#111317';
+    function token(name, fallback) {
+      return (getComputedStyle(document.documentElement).getPropertyValue(name) || '').trim() || fallback;
+    }
 
     function draw() {
       ctx.clearRect(0, 0, W, H);
-      ctx.strokeStyle = 'rgba(17,19,23,0.12)';
+      ctx.strokeStyle = token('--line-2', 'rgba(17,19,23,0.12)');
       ctx.lineWidth = 1;
       conns.forEach(function (cn) {
         var n = nodes[cn.n];
@@ -228,7 +230,7 @@
         ctx.stroke();
       });
       var s = 11;
-      ctx.fillStyle = black;
+      ctx.fillStyle = token('--ink', '#111317');
       nodes.forEach(function (n) {
         ctx.fillRect(Math.round(n.x * W - s / 2), Math.round(n.y * H - s / 2), s, s);
       });
@@ -242,10 +244,41 @@
     }
     resize();
     window.addEventListener('resize', resize);
+    window.addEventListener('themechange', draw);
+  }
+
+  /* ---------------------- theme toggle ---------------------- */
+  // The inline script in <head> applies the stored choice before paint; this
+  // only wires the button and keeps the OS preference as the default.
+  function initTheme() {
+    var btn = document.getElementById('themeToggle');
+    var osDark = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+    function current() {
+      var t = document.documentElement.getAttribute('data-theme');
+      return t || (osDark && osDark.matches ? 'dark' : 'light');
+    }
+    function label() {
+      if (btn) btn.setAttribute('aria-label', current() === 'dark' ? 'Switch to light theme' : 'Switch to dark theme');
+    }
+    function announce() { try { window.dispatchEvent(new Event('themechange')); } catch (e) {} }
+    if (btn) {
+      btn.addEventListener('click', function () {
+        var next = current() === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        try { localStorage.setItem('theme', next); } catch (e) {}
+        label(); announce();
+      });
+    }
+    if (osDark) {
+      var onChange = function () { label(); announce(); };
+      osDark.addEventListener ? osDark.addEventListener('change', onChange) : osDark.addListener(onChange);
+    }
+    label();
   }
 
   /* ---------------------- boot ---------------------- */
   function boot() {
+    initTheme();
     document.querySelectorAll('canvas[data-blob]').forEach(function (c) { try { initBlob(c); } catch (e) {} });
     document.querySelectorAll('canvas[data-lines]').forEach(function (c) { try { initLines(c); } catch (e) {} });
     document.querySelectorAll('canvas[data-connectors]').forEach(function (c) { try { initConnectors(c); } catch (e) {} });
