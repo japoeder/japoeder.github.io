@@ -13,7 +13,8 @@
 (function () {
   'use strict';
 
-  var canvas = document.getElementById('cloud');
+  function initCloud(canvas, opts) {
+  opts = opts || {};
   if (!canvas || typeof THREE === 'undefined') return;
 
   var isMobile = window.matchMedia('(max-width: 760px)').matches;
@@ -213,7 +214,7 @@
     document.documentElement.setAttribute('data-palette', name);
   }
   window.cloudPalette = applyPalette;
-  applyPalette(document.documentElement.getAttribute('data-palette') || 'navy');
+  applyPalette(opts.palette || document.documentElement.getAttribute('data-palette') || 'navy');
 
   /* ---------- sizing ---------- */
   function resize() {
@@ -221,8 +222,8 @@
     renderer.setSize(w, h, false);
     camera.aspect = w / h; camera.updateProjectionMatrix();
     // keep the shell about the same on-screen size at any aspect
-    camera.position.z = isMobile ? 8.2 : 6.0;
-    camera.position.x = isMobile ? 0 : -0.55;
+    camera.position.z = isMobile ? 8.2 : (opts.distance || 6.0);
+    camera.position.x = isMobile ? 0 : (opts.offsetX || 0);
     camera.lookAt(0, 0, 0);
   }
   window.addEventListener('resize', resize);
@@ -341,4 +342,13 @@
   }
   requestAnimationFrame(frame);
   window.cloudInfo = { particles: count, active: function () { return active; } };
+  }
+
+  window.initCloud = initCloud;
+  function boot() {
+    document.querySelectorAll('canvas[data-cloud]').forEach(function (c) {
+      try { initCloud(c, { offsetX: parseFloat(c.getAttribute('data-offset-x') || '0') }); } catch (e) {}
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();

@@ -81,7 +81,7 @@
 
   /* ---------------------- WebGL wireframe blob ---------------------- */
   function initBlob(canvas) {
-    var color = canvas.getAttribute('data-color') || '#f37021';
+    var color = canvas.getAttribute('data-color') || '#38e6e0';
     var detail = parseInt(canvas.getAttribute('data-detail') || '5', 10);
 
     if (typeof THREE === 'undefined') { blobFallback(canvas, color); return; }
@@ -164,7 +164,7 @@
       for (var l = 0; l < LINES; l++) {
         var k = l / LINES;
         ctx.beginPath();
-        ctx.strokeStyle = 'rgba(243,112,33,' + (0.10 + k * 0.32) + ')';
+        ctx.strokeStyle = 'rgba(56,230,224,' + (0.08 + k * 0.28) + ')';
         ctx.lineWidth = 1;
         for (var x = -50; x <= W + 50; x += 8) {
           var nx = (x - cx) / (W * 0.5);
