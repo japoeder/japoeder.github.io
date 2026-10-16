@@ -2,7 +2,7 @@
 
 ## Now
 
-- 🧑 Decide whether to restyle the hero after the Vesper particle cloud (dark navy and cyan, or the same particle system in the current light and orange scheme). Teardown: `docs/vesper-motion-reference.md`.
+- 🧑 Decide whether to restyle the hero after the Vesper particle cloud (dark navy and cyan, or the same particle system in the current light and orange scheme). Teardown: `docs/vesper-motion-reference.md`. Review page: `/labs/particle-cloud/` (navy and light toggles). Old styling is kept on branch `style-light-orange` and tag `style-light-orange-2026-10-16`.
 - 🤖 Add each JHU EN.705.603 case study to Projects, Johns Hopkins case studies, once it is graded: IronClad (due 2026-10-25), TextWave, MovieMate, SecureBank final project. Pattern: `projects/case-studies/techtrack/`. Own findings only; no course materials, code, or links to private repos.
 
 ## Next
