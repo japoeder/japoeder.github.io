@@ -246,14 +246,27 @@
       { x: 0.355, y: 0.66 }, // bottom-left
       { x: 0.645, y: 0.66 }  // bottom-right
     ];
-    // card: anchor inside the section card where the trace starts. The trace
-    // runs horizontally to the node's x, then kinks vertically into the node.
+    // Each trace starts on the edge of its card label (measured from the DOM,
+    // at the label's vertical midline) so it always meets the card, whatever
+    // the viewport puts the cards at. Left cards leave from their right edge,
+    // right cards from their left edge.
     var conns = [
-      { card: [0.205, 0.275], n: 0 }, // About Me      -> top-left
-      { card: [0.795, 0.275], n: 1 }, // Portfolio     -> top-right
-      { card: [0.205, 0.725], n: 2 }, // Experience    -> bottom-left
-      { card: [0.795, 0.725], n: 3 }  // Build with me -> bottom-right
+      { sel: '.quad.tl .card-label', side: 'right', n: 0 }, // About Me      -> top-left
+      { sel: '.quad.tr .card-label', side: 'left',  n: 1 }, // Portfolio     -> top-right
+      { sel: '.quad.bl .card-label', side: 'right', n: 2 }, // Experience    -> bottom-left
+      { sel: '.quad.br .card-label', side: 'left',  n: 3 }  // Build with me -> bottom-right
     ];
+    var hero = canvas.parentElement;
+    var GAP = 10; // breathing room between the card border and the trace
+
+    function anchor(cn) {
+      var el = hero.querySelector(cn.sel);
+      if (!el || el.offsetParent === null) return null;
+      var hr = canvas.getBoundingClientRect(), r = el.getBoundingClientRect();
+      var sy = r.top + r.height / 2 - hr.top;
+      var sx = cn.side === 'right' ? r.right - hr.left + GAP : r.left - hr.left - GAP;
+      return [sx, sy];
+    }
 
     function token(name, fallback) {
       return (getComputedStyle(document.documentElement).getPropertyValue(name) || '').trim() || fallback;
@@ -265,10 +278,13 @@
       ctx.lineWidth = 1;
       conns.forEach(function (cn) {
         var n = nodes[cn.n];
-        var sx = cn.card[0] * W, sy = cn.card[1] * H;
+        var a = anchor(cn);
+        if (!a) return;
+        var sx = a[0], sy = a[1];
         var nx = n.x * W, ny = n.y * H;
         var diag = Math.abs(ny - sy);            // 45° leg: equal run & rise
         var kx = nx - (nx >= sx ? diag : -diag); // kink point on the card's row
+        if (nx >= sx ? kx < sx : kx > sx) kx = sx; // card sits past the kink: go straight diagonal
         ctx.beginPath();
         ctx.moveTo(sx, sy);
         ctx.lineTo(kx, sy); // horizontal leg from the card
@@ -291,6 +307,9 @@
     resize();
     window.addEventListener('resize', resize);
     window.addEventListener('themechange', draw);
+    // card labels change width once the display font arrives
+    window.addEventListener('load', draw);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
   }
 
   /* ---------------------- theme toggle ---------------------- */

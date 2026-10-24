@@ -11,6 +11,7 @@
 
 ## Done
 
+- 🤖 2026-10-24: Hero connector traces anchored to the card labels from the DOM instead of fixed hero fractions, so they meet the Experience and Build with me cards at every viewport; Build with me raised to the Experience row (upwork 1491).
 - 🤖 2026-10-16: Light/dark toggle restored with an ice-blue light variant of the palette (navy is the default; only an explicit choice switches). Footer wireframes replaced by small particle clouds; particle ramps shifted toward blue `#3f7fcc`, mint kept for the tips.
 - 🤖 2026-10-16: Navy and cyan palette site-wide, particle cloud hero (`assets/js/cloud.js`), JP favicon, charts, thumbnail and icons recolored, light/dark toggle removed (a360ab2). Teardown in `docs/vesper-motion-reference.md`; review page stays at `/labs/particle-cloud/`. The previous light and orange styling is on branch `style-light-orange` and tag `style-light-orange-2026-10-16`.
 - 🤖 2026-10-15: Light and dark theme toggle in the nav on every page. Follows the OS preference until clicked, remembers the choice in the browser, no flash on load, charts and the explorer re-coloured through CSS tokens.

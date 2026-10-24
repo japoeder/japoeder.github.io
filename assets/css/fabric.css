@@ -185,7 +185,7 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; font-weight: 700; lette
 .quad.tl { top: calc(var(--nav-h) + clamp(1.5rem, 5vh, 4rem)); left: var(--pad); }
 .quad.tr { top: calc(var(--nav-h) + clamp(1.5rem, 5vh, 4rem)); right: var(--pad); text-align: right; }
 .quad.bl { bottom: clamp(8rem, 22vh, 13rem); left: var(--pad); }
-.quad.br { bottom: clamp(2.5rem, 8vh, 5rem); right: var(--pad); text-align: right; }
+.quad.br { bottom: clamp(8rem, 22vh, 13rem); right: var(--pad); text-align: right; }
 .quad .card-label {
   display: inline-flex; align-items: center; gap: 0.6rem; background: var(--surface);
   border: 1px solid var(--line-2); border-radius: 10px; padding: 0.7rem 1rem; font-family: var(--display);
